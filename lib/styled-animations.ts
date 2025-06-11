@@ -1,4 +1,4 @@
-import { keyframes } from "styled-components"
+import { keyframes } from "styled-components";
 
 export const animations = {
   pulse: keyframes`
@@ -16,6 +16,28 @@ export const animations = {
   fadeIn: keyframes`
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
+  `,
+
+  fadeInBlack: keyframes`
+    from { background-color: rgba(0,0,0,0); }
+    to { background-color: rgba(0,0,0,0.5); }
+  `,
+
+  fadeInTop: keyframes`
+    from { transform: translateY(0) }
+    to { transform: translateY(10em) }
+  `,
+  fadeInBottom: keyframes`
+    from { transform: translateY(0) }
+    to { transform: translateY(-10em) }
+  `,
+  fadeInRight: keyframes`
+    from { opacity: 0; transform: translateX(0) }
+    to { opacity: 1; transform: translateX(10em) }
+  `,
+  fadeInBig: keyframes`
+    from { opacity: 0.1; transform: scale(2) }
+    to { opacity: 1; transform: scale(1) }
   `,
 
   slideInLeft: keyframes`
@@ -37,4 +59,4 @@ export const animations = {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
   `,
-}
+};

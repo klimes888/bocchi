@@ -1,52 +1,59 @@
 "use client";
-
 import type React from "react";
-import { useState, useEffect } from "react";
 import styled from "styled-components";
-
-import { ChevronDown, Music, Guitar, Mic } from "lucide-react";
 import Image from "next/image";
+import { ChevronDown } from "lucide-react";
+
 import { animations } from "@/lib/styled-animations";
 
+// assets
+import Back from "@/assets/background.jpg";
+import LogoText from "@/assets/Logo_Text.png";
+import Kessoku from "@/assets/kessoku.png";
+
 export default function MainSection() {
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsAnimating(true);
-      setTimeout(() => setIsAnimating(false), 500);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <HeroSection>
+      <HeroImage src={Back} alt="Kessoku Band" fill />
+      <TitleLoggWrap>
+        <TitleLogo src={LogoText} alt="" />
+      </TitleLoggWrap>
       <HeroBackground />
-      <HeroImage
-        src="/placeholder.svg?height=800&width=1200"
-        alt="Kessoku Band"
-        fill
+      <BocchiFont>
+        <TitleLogo src={Kessoku} alt="" />
+      </BocchiFont>
+      <BlackLayout
+        style={{
+          top: "-10em",
+        }}
+        $type="top"
       />
       <HeroContent>
-        <div>
+        {/* <div>
           <h1>Welcome to</h1>
           <h2>Bocchi the Rock!</h2>
           <p className="subtitle">Fan Page</p>
-        </div>
-        <JapaneseText $isAnimating={isAnimating}>
+        </div> */}
+        {/* <JapaneseText $isAnimating={isAnimating}>
           孤独だけどロックしてる！
           <br />
           <span>(Lonely, but we rock!)</span>
-        </JapaneseText>
-        <IconContainer>
+        </JapaneseText> */}
+        {/* <IconContainer>
           <Guitar />
           <Mic />
           <Music />
-        </IconContainer>
+        </IconContainer> */}
       </HeroContent>
-      <ScrollIndicator>
-        <ChevronDown />
-      </ScrollIndicator>
+      <BlackLayout style={{ bottom: "-10em" }} />
+      <ScrollIndicatorWrap>
+        <ScrollIndicator $delay="50ms" style={{ bottom: "5%" }}>
+          <ChevronDown color="white" />
+        </ScrollIndicator>
+        <ScrollIndicator $delay="0ms" style={{ bottom: "50%" }}>
+          <ChevronDown color="white" />
+        </ScrollIndicator>
+      </ScrollIndicatorWrap>
     </HeroSection>
   );
 }
@@ -54,6 +61,7 @@ export default function MainSection() {
 // Styled Components
 const HeroSection = styled.section`
   position: relative;
+  width: 100%;
   height: 100vh;
   display: flex;
   align-items: center;
@@ -64,12 +72,13 @@ const HeroSection = styled.section`
 const HeroBackground = styled.div`
   position: absolute;
   inset: 0;
-  background: ${(props) => props.theme.colors.gradients.hero};
+  /* background: rgba(0, 0, 0, 0.3); */
+  animation: ${animations.fadeInBlack} 0.5s forwards;
 `;
 
 const HeroImage = styled(Image)`
   object-fit: cover;
-  opacity: 0.3;
+  opacity: 0.9;
 `;
 
 const HeroContent = styled.div`
@@ -163,16 +172,70 @@ const IconContainer = styled.div`
   }
 `;
 
-const ScrollIndicator = styled.div`
+const ScrollIndicatorWrap = styled.div`
   position: absolute;
-  bottom: 2rem;
+  bottom: 4%;
   left: 50%;
   transform: translateX(-50%);
-  animation: ${animations.bounce} 2s infinite;
+  display: flex;
+  flex-direction: column;
+  z-index: 999;
+`;
 
+const ScrollIndicator = styled.div<{ $delay: string }>`
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  animation: ${animations.bounce} 2s infinite;
+  animation-delay: ${({ $delay }) => $delay};
+  padding: -1em 0;
   svg {
     width: 2rem;
     height: 2rem;
     color: ${(props) => props.theme.colors.gray[600]};
   }
+`;
+
+const TitleLoggWrap = styled.div`
+  position: absolute;
+  top: 0;
+  left: -10em;
+  bottom: 0;
+  display: flex;
+  width: auto;
+  height: 100vh;
+  z-index: 10;
+  transform: rotate(180deg);
+  animation: ${animations.fadeInRight} 0.5s forwards 0.7s ease;
+  filter: drop-shadow(0em 0em 0.8em rgba(234, 179, 8, 0.5));
+`;
+
+const TitleLogo = styled(Image)`
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+`;
+
+const BlackLayout = styled.div<{ $type?: "top" | "bottom" }>`
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 5em;
+  background-color: #000;
+  z-index: 9;
+  animation: ${({ $type }) =>
+      $type === "top" ? animations.fadeInTop : animations.fadeInBottom}
+    0.5s forwards 0.5s;
+`;
+
+const BocchiFont = styled.div`
+  position: absolute;
+  bottom: 12%;
+  right: 3%;
+  width: 20%;
+  filter: drop-shadow(0.25em 0.25em 0.8em rgba(236, 72, 153, 0.8));
+  opacity: 0;
+  animation: ${animations.fadeInBig} 0.5s forwards 0.9s ease-in-out;
 `;
