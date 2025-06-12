@@ -75,7 +75,7 @@ const HeroBackground = styled.div`
 
 const HeroImage = styled(Image)`
   width: 100%;
-  opacity: 0.9;
+  object-fit: cover;
 `;
 
 const HeroContent = styled.div`

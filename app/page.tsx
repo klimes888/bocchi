@@ -10,12 +10,35 @@ import Guestbook from "@/components/Guestbook";
 import MainSection from "@/components/MainSection";
 import Footer from "@/components/Footer";
 import { useEffect, useState } from "react";
-import Loading from "@/components/ui/loading";
+import { UUID } from "@/lib/create-uuid";
+import { createUsers, fetchUserDocument } from "@/lib/firebase/users";
 
 export default function BocchiLandingPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let uuid = localStorage.getItem("user_uuid");
+
+    const resistUser = async () => {
+      const id = UUID();
+      const result = await createUsers(id);
+      if (result) {
+        localStorage.setItem("user_uuid", result);
+      }
+    };
+
+    (async () => {
+      if (uuid) {
+        try {
+          const data = await fetchUserDocument(uuid);
+        } catch (error) {
+          resistUser();
+        }
+      } else {
+        resistUser();
+      }
+    })();
+
     setIsLoading(false);
     const nextSection = document.getElementById("section1");
     nextSection?.scrollIntoView();
