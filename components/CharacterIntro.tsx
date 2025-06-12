@@ -1,81 +1,88 @@
 "use client";
 import type React from "react";
 import styled from "styled-components";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import Image from "next/image";
+
+// assets
+import Hitori from "@/assets/characters/Hitori_Gotoh.webp";
+import Nijika from "@/assets/characters/Nijika_Ijichi.webp";
+import Kita from "@/assets/characters/Ikuyo_Kita.webp";
+import Ryo from "@/assets/characters/Ryo_Yamada.webp";
 
 // Character data with their signature colors
 const characters = [
   {
-    id: 1,
     name: "Hitori Gotoh",
     nickname: "Bocchi",
-    voiceActor: "Yoshino Aoyama",
-    trait: "Extremely introverted but passionate guitarist",
-    color: "linear-gradient(135deg, #f472b6, #60a5fa)",
+    color: "linear-gradient(135deg, #f472b6, #FD02FE)",
     bgColor: "linear-gradient(135deg, #fce7f3, #dbeafe)",
-    votes: 1247,
+    img: Hitori,
+    polygon: "polygon(2% 3%, 97% 0%, 98% 95%, 0% 98%)",
+    rotate: "2deg",
+    bdColor: "rgba(244, 114, 182, 0.8)",
   },
   {
-    id: 2,
     name: "Nijika Ijichi",
     nickname: "Nijika",
-    voiceActor: "Sayumi Suzushiro",
-    trait: "Cheerful drummer who brings everyone together",
     color: "linear-gradient(135deg, #facc15, #fb923c)",
     bgColor: "linear-gradient(135deg, #fef3c7, #fed7aa)",
-    votes: 892,
+    img: Nijika,
+    polygon: "polygon(0% 5%, 95% 0%, 100% 90%, 5% 100%)",
+    rotate: "1deg",
+    bdColor: "rgb(250, 204, 21, 0.8)",
   },
   {
-    id: 3,
     name: "Ryo Yamada",
     nickname: "Ryo",
-    voiceActor: "Saku Mizuno",
-    trait: "Cool bassist with a mysterious aura",
     color: "linear-gradient(135deg, #2563eb, #4f46e5)",
     bgColor: "linear-gradient(135deg, #dbeafe, #e0e7ff)",
-    votes: 1056,
+    img: Ryo,
+    pos: { top: "2em", left: "1.5em" },
+    polygon: "polygon(2% 4%, 97% 7%, 95% 93%, 5% 96%)",
+    rotate: "3deg",
+    bdColor: "rgb(37, 99, 235, 0.8)",
   },
   {
-    id: 4,
     name: "Ikuyo Kita",
     nickname: "Kita",
-    voiceActor: "Ikumi Hasegawa",
-    trait: "Energetic vocalist full of dreams",
     color: "linear-gradient(135deg, #f87171, #fb923c)",
     bgColor: "linear-gradient(135deg, #fecaca, #fed7aa)",
-    votes: 734,
+    img: Kita,
+    polygon: "polygon(2% 4%, 97% 7%, 95% 93%, 5% 96%)",
+    rotate: "0deg",
+    bdColor: "rgb(251, 146, 60, 0.8)",
   },
 ];
 
 export default function CharacterIntro() {
   return (
-    <Section>
+    <Section id="section2">
       <Container>
-        <SectionTitle>Meet Kessoku Band</SectionTitle>
+        <SectionTitle>Kessoku Band</SectionTitle>
         <CharacterGrid>
-          {characters.map((character) => (
+          {characters.map((character, i) => (
             <CharacterCard
-              key={character.id}
+              key={i}
               $bgColor={character.bgColor}
               $color={character.color}
             >
-              <CardContent style={{ padding: "1.5rem", textAlign: "center" }}>
-                <CharacterAvatar $color={character.color}>
-                  <Image
-                    src="/placeholder.svg?height=80&width=80"
+              <ContentInner $color={character.color}>
+                <CharacterLayoutOut>
+                  <SquareLayout $color={character.bdColor} />
+                  <CharacterLayout
+                    $polygon={character.polygon}
+                    $rotate={character.rotate}
+                  />
+                </CharacterLayoutOut>
+                <CharacterAvatar>
+                  <CharaImage
+                    src={character.img}
                     alt={character.name}
-                    width={80}
-                    height={80}
+                    $pos={character?.pos}
                   />
                 </CharacterAvatar>
-                <CharacterInfo>
-                  <h3>{character.name}</h3>
-                  <p className="nickname">"{character.nickname}"</p>
-                  <p className="voice-actor">CV: {character.voiceActor}</p>
-                  <p className="trait">{character.trait}</p>
-                </CharacterInfo>
-              </CardContent>
+              </ContentInner>
             </CharacterCard>
           ))}
         </CharacterGrid>
@@ -85,15 +92,18 @@ export default function CharacterIntro() {
 }
 
 const Section = styled.section<{ $background?: string }>`
-  padding: 4rem 1rem;
-  ${(props) => props.$background && `background: ${props.$background};`}
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 `;
 
 const SectionTitle = styled.h2`
   font-size: 2.25rem;
   font-weight: bold;
   text-align: center;
-  margin-bottom: 3rem;
   background: ${(props) => props.theme.colors.gradients.text};
   background-clip: text;
   -webkit-background-clip: text;
@@ -107,70 +117,72 @@ const Container = styled.div`
 
 const CharacterGrid = styled.div`
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-
-  @media (min-width: ${(props) => props.theme.breakpoints.md}) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media (min-width: ${(props) => props.theme.breakpoints.lg}) {
-    grid-template-columns: repeat(4, 1fr);
-  }
+  width: 100%;
+  grid-template-columns: repeat(2, 1fr);
 `;
 
 const CharacterCard = styled(Card)<{ $bgColor: string; $color: string }>`
-  background: ${(props) => props.$bgColor};
-  border: 2px solid ${(props) => props.theme.colors.white};
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
-
   &:hover {
     box-shadow: 0 25px 25px -5px rgba(0, 0, 0, 0.1);
     transform: scale(1.05);
   }
 `;
 
-const CharacterAvatar = styled.div<{ $color: string }>`
-  width: 6rem;
-  height: 6rem;
-  margin: 0 auto;
-  border-radius: 50%;
-  background: ${(props) => props.$color};
+// card wrapper
+const ContentInner = styled.div<{ $color: string }>`
+  position: relative;
   display: flex;
-  align-items: center;
   justify-content: center;
-
-  img {
-    border-radius: 50%;
-  }
+  align-items: center;
+  background: ${(props) => props.$color};
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 `;
 
-const CharacterInfo = styled.div`
-  text-align: center;
+const CharacterLayoutOut = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1em;
+`;
 
-  h3 {
-    font-size: 1.25rem;
-    font-weight: bold;
-    color: ${(props) => props.theme.colors.gray[800]};
-  }
+const CharacterLayout = styled.div<{ $polygon: string; $rotate: string }>`
+  width: 100%;
+  height: 100%;
+  background-color: #222;
+  overflow: hidden;
+  clip-path: ${({ $polygon }) => $polygon};
+  transform: rotate(${({ $rotate }) => $rotate});
+`;
 
-  .nickname {
-    font-size: 0.875rem;
-    color: ${(props) => props.theme.colors.gray[600]};
-    font-weight: 500;
-  }
+const SquareLayout = styled.div<{ $color: string }>`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 37%;
+  border: 0.1em solid ${({ $color }) => $color};
+  z-index: 1;
+`;
 
-  .voice-actor {
-    font-size: 0.75rem;
-    color: ${(props) => props.theme.colors.gray[500]};
-    margin-top: 0.25rem;
-  }
+const CharacterAvatar = styled.div`
+  margin: 0 auto;
+  width: 18em;
+  height: 20em;
+`;
 
-  .trait {
-    font-size: 0.875rem;
-    color: ${(props) => props.theme.colors.gray[700]};
-    font-style: italic;
-    margin-top: 1rem;
-  }
+const CharaImage = styled(Image)<{ $pos?: { top: string; left: string } }>`
+  position: absolute;
+  top: ${({ $pos }) => $pos?.top || 0};
+  left: ${({ $pos }) => $pos?.left || 0};
+  right: 0;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  z-index: 999;
+  object-position: center top;
 `;

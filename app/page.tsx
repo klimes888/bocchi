@@ -1,5 +1,4 @@
 "use client";
-
 import type React from "react";
 import styled, { ThemeProvider } from "styled-components";
 
@@ -7,9 +6,9 @@ import { theme } from "@/lib/styled-theme";
 import MusicSection from "@/components/MusicSection";
 import VoteSection from "@/components/VoteSection";
 import CharacterIntro from "@/components/CharacterIntro";
-import { Footer } from "react-day-picker";
 import Guestbook from "@/components/Guestbook";
 import MainSection from "@/components/MainSection";
+import Footer from "@/components/Footer";
 
 export default function BocchiLandingPage() {
   return (
@@ -38,6 +37,8 @@ export default function BocchiLandingPage() {
 
 // Styled Components
 const PageContainer = styled.div`
+  position: relative;
+  width: 100%;
   min-height: 100vh;
   background: ${(props) => props.theme.colors.gradients.background};
 `;

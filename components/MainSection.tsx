@@ -1,5 +1,5 @@
 "use client";
-import type React from "react";
+import { useEffect } from "react";
 import styled from "styled-components";
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
@@ -10,12 +10,22 @@ import { animations } from "@/lib/styled-animations";
 import Back from "@/assets/background.jpg";
 import LogoText from "@/assets/Logo_Text.png";
 import Kessoku from "@/assets/kessoku.png";
+import { useDragDetect } from "@/hooks/use-drag";
+import ParticleBackground from "./ui/canvas-animation";
 
 export default function MainSection() {
+  // hooks
+  useDragDetect({ threshold: 20, curPos: "section1", where: "section2" });
+
+  const goToNextSection = () => {
+    const nextSection = document.getElementById("section2");
+    nextSection?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
-    <HeroSection>
-      <HeroImage src={Back} alt="Kessoku Band" fill />
-      <TitleLoggWrap>
+    <HeroSection id="section1">
+      <HeroImage src={Back} alt="Kessoku Band" fill sizes="100vw" />
+      <TitleLoggWrap onMouseDown={(e) => console.log("React mousedown", e)}>
         <TitleLogo src={LogoText} alt="" />
       </TitleLoggWrap>
       <HeroBackground />
@@ -28,25 +38,10 @@ export default function MainSection() {
         }}
         $type="top"
       />
-      <HeroContent>
-        {/* <div>
-          <h1>Welcome to</h1>
-          <h2>Bocchi the Rock!</h2>
-          <p className="subtitle">Fan Page</p>
-        </div> */}
-        {/* <JapaneseText $isAnimating={isAnimating}>
-          孤独だけどロックしてる！
-          <br />
-          <span>(Lonely, but we rock!)</span>
-        </JapaneseText> */}
-        {/* <IconContainer>
-          <Guitar />
-          <Mic />
-          <Music />
-        </IconContainer> */}
-      </HeroContent>
+      <HeroContent />
       <BlackLayout style={{ bottom: "-10em" }} />
-      <ScrollIndicatorWrap>
+      <ParticleBackground />
+      <ScrollIndicatorWrap onClick={goToNextSection}>
         <ScrollIndicator $delay="50ms" style={{ bottom: "5%" }}>
           <ChevronDown color="white" />
         </ScrollIndicator>
@@ -59,10 +54,11 @@ export default function MainSection() {
 }
 
 // Styled Components
-const HeroSection = styled.section`
+const HeroSection = styled.div`
   position: relative;
   width: 100%;
   height: 100vh;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -77,7 +73,7 @@ const HeroBackground = styled.div`
 `;
 
 const HeroImage = styled(Image)`
-  object-fit: cover;
+  width: 100%;
   opacity: 0.9;
 `;
 
@@ -124,55 +120,7 @@ const HeroContent = styled.div`
   }
 `;
 
-const JapaneseText = styled.div<{ $isAnimating: boolean }>`
-  font-size: 1.25rem;
-  color: ${(props) => props.theme.colors.gray[600]};
-  font-weight: 500;
-  transition: all 0.5s ease;
-  margin: 2rem 0;
-
-  ${(props) =>
-    props.$isAnimating &&
-    `
-    transform: scale(1.1);
-    color: ${props.theme.colors.primary.pink};
-  `}
-
-  @media (min-width: ${(props) => props.theme.breakpoints.md}) {
-    font-size: 1.5rem;
-  }
-
-  span {
-    font-size: 1rem;
-  }
-`;
-
-const IconContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 2rem;
-
-  svg {
-    width: 2rem;
-    height: 2rem;
-    animation: ${animations.bounce} 2s infinite;
-
-    &:nth-child(1) {
-      color: ${(props) => props.theme.colors.primary.pink};
-    }
-    &:nth-child(2) {
-      color: ${(props) => props.theme.colors.primary.yellow};
-      animation-delay: 0.1s;
-    }
-    &:nth-child(3) {
-      color: ${(props) => props.theme.colors.primary.blue};
-      animation-delay: 0.2s;
-    }
-  }
-`;
-
-const ScrollIndicatorWrap = styled.div`
+const ScrollIndicatorWrap = styled.button`
   position: absolute;
   bottom: 4%;
   left: 50%;
@@ -212,6 +160,7 @@ const TitleLoggWrap = styled.div`
 `;
 
 const TitleLogo = styled(Image)`
+  position: relative;
   width: 100%;
   height: 100%;
   object-fit: contain;
