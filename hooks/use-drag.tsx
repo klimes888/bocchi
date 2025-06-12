@@ -14,6 +14,33 @@ export function useDragDetect({
   const deltaYSum = useRef(0);
   const wheelTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // useEffect(() => {
+  //   const section = document.getElementById(curPos);
+  //   if (!section) return;
+
+  //   const handleWheel = (e: WheelEvent) => {
+  //     const atTop = section.scrollTop === 0;
+  //     const atBottom =
+  //       section.scrollTop + section.clientHeight >= section.scrollHeight;
+
+  //     const goingDown = e.deltaY > 0;
+  //     const goingUp = e.deltaY < 0;
+
+  //     // 아래로 스크롤하는 경우 → bottom에 도달하지 않았을 때만 scrollBy 적용
+  //     // 위로 스크롤하는 경우 → top에 도달하지 않았을 때만 scrollBy 적용
+  //     const shouldScroll = (goingDown && !atBottom) || (goingUp && !atTop);
+
+  //     if (shouldScroll) {
+  //       e.preventDefault();
+  //       section.scrollTop += e.deltaY * 0.3;
+  //       // section.scrollBy({ top: e.deltaY * 0.3 });
+  //     }
+  //   };
+
+  //   section.addEventListener("wheel", handleWheel, { passive: false });
+  //   return () => section.removeEventListener("wheel", handleWheel);
+  // }, [curPos]);
+
   useLayoutEffect(() => {
     const section = document.getElementById(curPos);
     if (!section) return;
@@ -59,7 +86,7 @@ export function useDragDetect({
           goToNextSection();
         }
         deltaYSum.current = 0;
-      }, 50);
+      }, 10);
     };
 
     section.addEventListener("touchmove", handleTouchStart, {

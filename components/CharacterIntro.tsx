@@ -66,16 +66,23 @@ export default function CharacterIntro() {
               key={i}
               $bgColor={character.bgColor}
               $color={character.color}
+              $bdColor={character.bdColor}
             >
               <ContentInner $color={character.color}>
                 <CharacterLayoutOut>
                   <SquareLayout $color={character.bdColor} />
+                  <SmallSquare $color={character.bdColor} />
                   <CharacterLayout
                     $polygon={character.polygon}
                     $rotate={character.rotate}
                   />
                 </CharacterLayoutOut>
                 <CharacterAvatar>
+                  <BlurCharaImage
+                    src={character.img}
+                    alt={character.name}
+                    $pos={character?.pos}
+                  />
                   <CharaImage
                     src={character.img}
                     alt={character.name}
@@ -97,7 +104,8 @@ const Section = styled.section<{ $background?: string }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  background-color: #000;
+  /* overflow: hidden; */
 `;
 
 const SectionTitle = styled.h2`
@@ -113,20 +121,15 @@ const SectionTitle = styled.h2`
 const Container = styled.div`
   max-width: 80rem;
   margin: 0 auto;
+  @media (max-width: 420px) {
+    width: 100%;
+  }
 `;
 
 const CharacterGrid = styled.div`
   display: grid;
   width: 100%;
   grid-template-columns: repeat(2, 1fr);
-`;
-
-const CharacterCard = styled(Card)<{ $bgColor: string; $color: string }>`
-  transition: all 0.3s ease;
-  &:hover {
-    box-shadow: 0 25px 25px -5px rgba(0, 0, 0, 0.1);
-    transform: scale(1.05);
-  }
 `;
 
 // card wrapper
@@ -157,32 +160,100 @@ const CharacterLayout = styled.div<{ $polygon: string; $rotate: string }>`
   overflow: hidden;
   clip-path: ${({ $polygon }) => $polygon};
   transform: rotate(${({ $rotate }) => $rotate});
+  transition: transform 0.6s ease;
 `;
 
 const SquareLayout = styled.div<{ $color: string }>`
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) scale(0.1);
   padding: 37%;
   border: 0.1em solid ${({ $color }) => $color};
   z-index: 1;
 `;
 
+const SmallSquare = styled(SquareLayout)`
+  padding: 18%;
+`;
+
 const CharacterAvatar = styled.div`
-  margin: 0 auto;
   width: 18em;
   height: 20em;
+  object-fit: contain;
+  z-index: 1;
+  @media (max-width: 420px) {
+    width: 100%;
+    height: auto;
+  }
 `;
 
 const CharaImage = styled(Image)<{ $pos?: { top: string; left: string } }>`
   position: absolute;
-  top: ${({ $pos }) => $pos?.top || 0};
-  left: ${({ $pos }) => $pos?.left || 0};
+  top: ${({ $pos }) => $pos?.top || "0"};
+  left: ${({ $pos }) => $pos?.left || "0"};
   right: 0;
   width: 100%;
   height: auto;
   object-fit: cover;
-  z-index: 999;
   object-position: center top;
+  transform: translateY(0) scale(1);
+  transition: all 0.5s ease;
+`;
+
+const BlurCharaImage = styled(CharaImage)<{
+  $pos?: { top: string; left: string };
+}>`
+  filter: brightness(0) saturate(100%);
+  transform: translateY(1em) scale(1.08);
+  transition: all 0.5s ease;
+`;
+
+const CharacterCard = styled(Card)<{
+  $bgColor: string;
+  $color: string;
+  $bdColor: string;
+}>`
+  position: relative;
+  width: 100%;
+  transition: transform 0.5s ease;
+  overflow: hidden;
+
+  ${CharacterLayout}, ${SmallSquare}, ${CharaImage} {
+    transition: all 0.6s ease;
+  }
+
+  ${SquareLayout} {
+    transition: all 0.6s ease 0.2s;
+  }
+
+  &:hover {
+    transform: scale(1.05);
+    z-index: 2;
+
+    ${CharacterLayout} {
+      transform: rotate(5deg) scale(1.05);
+      transition: transform 0.6s ease;
+    }
+
+    ${SquareLayout} {
+      transform: translate(-50%, -50%) scale(1.1) rotate(90deg);
+      transition: all 0.6s ease 0.2s;
+    }
+
+    ${SmallSquare} {
+      display: block;
+      transform: translate(-50%, -50%) scale(1.1) rotate(90deg);
+      transition: all 0.6s ease;
+    }
+
+    ${CharaImage} {
+      transform: translate(0, 0) scale(1.05);
+      transition: all 0.5s ease;
+    }
+  }
+
+  @media (max-width: 420px) {
+    aspect-ratio: 3 / 4;
+  }
 `;

@@ -9,10 +9,23 @@ import CharacterIntro from "@/components/CharacterIntro";
 import Guestbook from "@/components/Guestbook";
 import MainSection from "@/components/MainSection";
 import Footer from "@/components/Footer";
+import { useEffect, useState } from "react";
+import Loading from "@/components/ui/loading";
 
 export default function BocchiLandingPage() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setIsLoading(false);
+    const nextSection = document.getElementById("section1");
+    nextSection?.scrollIntoView();
+  }, []);
+
+  // if (!isLoading) return
+
   return (
     <ThemeProvider theme={theme}>
+      {/* <Loading isLoading={isLoading} /> */}
       <PageContainer>
         {/* Hero Section */}
         <MainSection />
