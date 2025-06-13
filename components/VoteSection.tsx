@@ -1,13 +1,29 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
-import styled from "styled-components";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import styled, { css } from "styled-components";
 import { Heart, Star } from "lucide-react";
 import Image from "next/image";
+
+// components
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+
+// lib
 import { animations } from "@/lib/styled-animations";
+import { submitVote } from "@/lib/firebase/vote";
+
+// assets
+import NijikaGif from "@/assets/votes/nijika.gif";
+import RyoGif from "@/assets/votes/ryo.gif";
+import HitoriGif from "@/assets/votes/hitori.gif";
+import KitaGif from "@/assets/votes/kita.gif";
+
+import Nijika from "@/assets/votes/nijika.jpg";
+import Ryo from "@/assets/votes/ryo.jpg";
+import Hitori from "@/assets/votes/hitori.jpg";
+import Kita from "@/assets/votes/kita.jpg";
 
 // Character data with their signature colors
 const characters = [
@@ -17,9 +33,11 @@ const characters = [
     nickname: "Bocchi",
     voiceActor: "Yoshino Aoyama",
     trait: "Extremely introverted but passionate guitarist",
-    color: "linear-gradient(135deg, #f472b6, #60a5fa)",
+    color: "linear-gradient(135deg, #f68ac2, #FD02FE)",
     bgColor: "linear-gradient(135deg, #fce7f3, #dbeafe)",
-    votes: 1247,
+    gif: HitoriGif,
+    img: Hitori,
+    votes: 0,
   },
   {
     id: 2,
@@ -29,7 +47,9 @@ const characters = [
     trait: "Cheerful drummer who brings everyone together",
     color: "linear-gradient(135deg, #facc15, #fb923c)",
     bgColor: "linear-gradient(135deg, #fef3c7, #fed7aa)",
-    votes: 892,
+    gif: NijikaGif,
+    img: Nijika,
+    votes: 0,
   },
   {
     id: 3,
@@ -37,9 +57,11 @@ const characters = [
     nickname: "Ryo",
     voiceActor: "Saku Mizuno",
     trait: "Cool bassist with a mysterious aura",
-    color: "linear-gradient(135deg, #2563eb, #4f46e5)",
+    color: "linear-gradient(135deg, #4e84f7, #4f46e5)",
     bgColor: "linear-gradient(135deg, #dbeafe, #e0e7ff)",
-    votes: 1056,
+    gif: RyoGif,
+    img: Ryo,
+    votes: 0,
   },
   {
     id: 4,
@@ -47,61 +69,105 @@ const characters = [
     nickname: "Kita",
     voiceActor: "Ikumi Hasegawa",
     trait: "Energetic vocalist full of dreams",
-    color: "linear-gradient(135deg, #f87171, #fb923c)",
+    color: "linear-gradient(135deg, #f56969, #fb923c)",
     bgColor: "linear-gradient(135deg, #fecaca, #fed7aa)",
-    votes: 734,
+    gif: KitaGif,
+    img: Kita,
+    votes: 0,
   },
 ];
 
-export default function VoteSection() {
-  const [votes, setVotes] = useState(characters.map((char) => char.votes));
+interface Props {
+  userId: string | null;
+  whoVoted: string | null;
+  voteCount: Record<string, number> | null;
+}
+
+export default function VoteSection(props: Props) {
+  const { userId, whoVoted, voteCount } = props;
+  const [mouseEnter, setMouseEnter] = useState<number | null>(null);
+  const [itemList, setItemList] = useState(characters);
   const [votedCharacter, setVotedCharacter] = useState<number | null>(null);
 
   const [isAnimating, setIsAnimating] = useState(false);
 
-  const handleVote = (characterIndex: number) => {
-    if (votedCharacter !== null) return;
+  const handleVote = async (characterIndex: number) => {
+    if (votedCharacter !== null || !userId) return;
 
-    setVotes((prev) =>
-      prev.map((vote, index) => (index === characterIndex ? vote + 1 : vote))
-    );
-    setVotedCharacter(characterIndex);
-    setIsAnimating(true);
-    setTimeout(() => setIsAnimating(false), 1000);
+    try {
+      await submitVote({ uid: userId, vote: characterIndex.toString() });
+
+      // count up
+      setItemList((prev) =>
+        prev.map((data, i) => {
+          if (characterIndex === data.id) {
+            return { ...data, votes: data.votes + 1 };
+          } else return data;
+        })
+      );
+
+      setVotedCharacter(characterIndex);
+      setIsAnimating(true);
+      setTimeout(() => setIsAnimating(false), 1000);
+    } catch (error) {
+      console.error("error", error);
+    }
   };
+
+  useEffect(() => {
+    if (!whoVoted) return;
+    setVotedCharacter(whoVoted ? Number(whoVoted) : null);
+  }, [whoVoted]);
+
+  useEffect(() => {
+    if (!voteCount) return;
+    const result = characters.map((data, i) => ({
+      ...data,
+      votes: voteCount[i + 1],
+    }));
+    setItemList(result);
+  }, [voteCount]);
 
   return (
     <SectionLayout>
       <Container>
-        <SectionTitle>Character Popularity Vote</SectionTitle>
-        <p className="description">Who's your favorite Kessoku Band member?</p>
+        <SectionTitle>최애 선정하기</SectionTitle>
+        {/* <p className="description">Who's your favorite Kessoku Band member?</p> */}
         <VoteGrid>
-          {characters.map((character, index) => (
-            <VoteCard key={character.id}>
+          {itemList.map((character, i) => (
+            <VoteCard
+              key={character.id}
+              onMouseEnter={() => setMouseEnter(character.id)}
+              onMouseLeave={() => setMouseEnter(null)}
+            >
               <CardContent style={{ padding: "1.5rem", textAlign: "center" }}>
                 <VoteAvatar $color={character.color}>
-                  <Image
-                    src="/placeholder.svg?height=64&width=64"
+                  <ImageWrap
+                    src={character.gif}
                     alt={character.name}
-                    width={64}
-                    height={64}
+                    isVisible={character.id === mouseEnter && !!mouseEnter}
+                  />
+                  <ImageWrap
+                    src={character.img}
+                    alt={character.name}
+                    isVisible={character.id !== mouseEnter}
                   />
                 </VoteAvatar>
                 <VoteInfo>
                   <h3>{character.name}</h3>
                   <div className="vote-count">
                     <Heart />
-                    <span>{votes[index]}</span>
+                    <span>{character.votes}</span>
                   </div>
                   <VoteButton
-                    onClick={() => handleVote(index)}
+                    onClick={() => handleVote(character.id)}
                     disabled={votedCharacter !== null}
                     $voted={votedCharacter !== null}
-                    $isVotedCharacter={votedCharacter === index}
+                    $isVotedCharacter={votedCharacter === character.id}
                     $color={character.color}
                     $isAnimating={isAnimating}
                   >
-                    {votedCharacter === index ? (
+                    {votedCharacter === character.id ? (
                       <>
                         <Star
                           style={{
@@ -110,12 +176,12 @@ export default function VoteSection() {
                             marginRight: "0.5rem",
                           }}
                         />
-                        Voted!
+                        최애 선정!
                       </>
                     ) : votedCharacter !== null ? (
-                      "Vote Cast"
+                      "투표 완료"
                     ) : (
-                      "Vote"
+                      "투표하기"
                     )}
                   </VoteButton>
                 </VoteInfo>
@@ -151,8 +217,9 @@ const Container = styled.div`
 `;
 
 const SectionLayout = styled(Section)`
-  background: ${(props) => props.theme.colors.gradients.section};
-
+  /* background: ${(props) => props.theme.colors.gradients.section}; */
+  /* background: #1b1f3b; */
+  /* background: linear-gradient(135deg, #000000 0%, #1b1f3b 60%, #da007a 100%); */
   .description {
     text-align: center;
     color: ${(props) => props.theme.colors.gray[600]};
@@ -181,15 +248,19 @@ const VoteCard = styled(Card)`
   border: 2px solid ${(props) => props.theme.colors.gray[200]};
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
-
+  border-radius: 0.25em;
+  overflow: hidden;
   &:hover {
     box-shadow: 0 25px 25px -5px rgba(0, 0, 0, 0.1);
   }
 `;
 
 const VoteAvatar = styled.div<{ $color: string }>`
-  width: 5rem;
-  height: 5rem;
+  position: relative;
+  width: 7rem;
+  max-width: 7rem;
+  height: 7rem;
+  max-height: 7rem;
   margin: 0 auto;
   border-radius: 50%;
   background: ${(props) => props.$color};
@@ -255,13 +326,22 @@ const VoteButton = styled(Button)<{
   ${(props) =>
     props.$isAnimating &&
     props.$isVotedCharacter &&
-    `
-    animation: ${animations.pulse} 1s ease-in-out;
-    transform: scale(1.05);
-  `}
+    css`
+      animation: ${animations.pulse} 1s ease-in-out;
+      transform: scale(1.05);
+    `}
   
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
   }
+`;
+
+const ImageWrap = styled(Image)<{ isVisible: boolean }>`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.5s ease;
+  opacity: ${({ isVisible }) => (isVisible ? 1 : 0)};
 `;

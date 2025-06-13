@@ -11,26 +11,47 @@ import MainSection from "@/components/MainSection";
 import Footer from "@/components/Footer";
 import { useEffect, useState } from "react";
 import { UUID } from "@/lib/create-uuid";
-import { createUsers, fetchUserDocument } from "@/lib/firebase/users";
+import {
+  createUsers,
+  fetchUserDocument,
+  getVoteCounts,
+} from "@/lib/firebase/users";
 
 export default function BocchiLandingPage() {
   const [isLoading, setIsLoading] = useState(true);
+  const [whoVoted, setWhoVoted] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [voteCount, setvoteCount] = useState<Record<string, number> | null>(
+    null
+  );
 
   useEffect(() => {
-    let uuid = localStorage.getItem("user_uuid");
+    (async () => {
+      const count = await getVoteCounts();
+      setvoteCount(count);
+    })();
+  }, []);
+
+  useEffect(() => {
+    const uuid = localStorage.getItem("user_uuid");
 
     const resistUser = async () => {
       const id = UUID();
       const result = await createUsers(id);
       if (result) {
         localStorage.setItem("user_uuid", result);
+        setUserId(result);
       }
     };
 
     (async () => {
       if (uuid) {
         try {
-          const data = await fetchUserDocument(uuid);
+          const { user, votes } = await fetchUserDocument(uuid);
+          const { uid, vote } = votes[0];
+
+          setWhoVoted(vote || null);
+          setUserId(uid || null);
         } catch (error) {
           resistUser();
         }
@@ -57,7 +78,11 @@ export default function BocchiLandingPage() {
         <CharacterIntro />
 
         {/* Character Popularity Vote Section */}
-        <VoteSection />
+        <VoteSection
+          userId={userId}
+          whoVoted={whoVoted}
+          voteCount={voteCount}
+        />
         {/* YouTube Music Video Carousel */}
         <MusicSection />
 
