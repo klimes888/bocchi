@@ -16,6 +16,7 @@ import {
   fetchUserDocument,
   getVoteCounts,
 } from "@/lib/firebase/users";
+import Loading from "@/components/ui/loading";
 
 export default function BocchiLandingPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -24,7 +25,7 @@ export default function BocchiLandingPage() {
   const [voteCount, setvoteCount] = useState<Record<string, number> | null>(
     null
   );
-
+  console.log("isLoading", isLoading);
   useEffect(() => {
     (async () => {
       const count = await getVoteCounts();
@@ -60,16 +61,18 @@ export default function BocchiLandingPage() {
       }
     })();
 
-    setIsLoading(false);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+
     const nextSection = document.getElementById("section1");
     nextSection?.scrollIntoView();
   }, []);
 
-  // if (!isLoading) return
+  if (isLoading) return <Loading />;
 
   return (
     <ThemeProvider theme={theme}>
-      {/* <Loading isLoading={isLoading} /> */}
       <PageContainer>
         {/* Hero Section */}
         <MainSection />
@@ -102,4 +105,5 @@ const PageContainer = styled.div`
   width: 100%;
   min-height: 100vh;
   background: ${(props) => props.theme.colors.gradients.background};
+  transform-style: preserve-3d;
 `;

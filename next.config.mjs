@@ -9,6 +9,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-}
+  compiler: {
+    styledComponents: true, // styled-components SSR 지원 활성화
+  },
+};
 
-export default nextConfig
+export default nextConfig;

@@ -145,12 +145,12 @@ export default function VoteSection(props: Props) {
                   <ImageWrap
                     src={character.gif}
                     alt={character.name}
-                    isVisible={character.id === mouseEnter && !!mouseEnter}
+                    $isVisible={character.id === mouseEnter && !!mouseEnter}
                   />
                   <ImageWrap
                     src={character.img}
                     alt={character.name}
-                    isVisible={character.id !== mouseEnter}
+                    $isVisible={character.id !== mouseEnter}
                   />
                 </VoteAvatar>
                 <VoteInfo>
@@ -198,6 +198,7 @@ export default function VoteSection(props: Props) {
 const Section = styled.section<{ $background?: string }>`
   padding: 4rem 1rem;
   ${(props) => props.$background && `background: ${props.$background};`}
+  z-index: 3;
 `;
 
 const SectionTitle = styled.h2`
@@ -217,9 +218,6 @@ const Container = styled.div`
 `;
 
 const SectionLayout = styled(Section)`
-  /* background: ${(props) => props.theme.colors.gradients.section}; */
-  /* background: #1b1f3b; */
-  /* background: linear-gradient(135deg, #000000 0%, #1b1f3b 60%, #da007a 100%); */
   .description {
     text-align: center;
     color: ${(props) => props.theme.colors.gray[600]};
@@ -337,11 +335,11 @@ const VoteButton = styled(Button)<{
   }
 `;
 
-const ImageWrap = styled(Image)<{ isVisible: boolean }>`
+const ImageWrap = styled(Image)<{ $isVisible: boolean }>`
   position: absolute;
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: opacity 0.5s ease;
-  opacity: ${({ isVisible }) => (isVisible ? 1 : 0)};
+  opacity: ${({ $isVisible }) => ($isVisible ? 1 : 0)};
 `;

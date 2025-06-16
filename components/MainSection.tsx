@@ -64,6 +64,7 @@ const HeroSection = styled.div`
   justify-content: center;
   overflow: hidden;
   background-color: #000;
+  z-index: 1;
 `;
 
 const HeroBackground = styled.div`
