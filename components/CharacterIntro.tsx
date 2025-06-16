@@ -10,14 +10,15 @@ import Nijika from "@/assets/characters/Nijika_Ijichi.webp";
 import Kita from "@/assets/characters/Ikuyo_Kita.webp";
 import Ryo from "@/assets/characters/Ryo_Yamada.webp";
 import { useIntersectionObserver } from "./useIntersection";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 import Back from "../assets/background.jpg";
+import CharacterIntroPopup from "./CharacterIntro_Popup";
 
 // Character data with their signature colors
 const characters = [
   {
-    name: "Hitori Gotoh",
+    name: "Hitori",
     color: "linear-gradient(135deg, #f472b6, #FD02FE)",
     bgColor: "linear-gradient(135deg, #fce7f3, #dbeafe)",
     img: Hitori,
@@ -27,7 +28,7 @@ const characters = [
     animation: "translate(-200%, -200%) rotate(-90deg)",
   },
   {
-    name: "Nijika Ijichi",
+    name: "Nijika",
     color: "linear-gradient(135deg, #facc15, #fb923c)",
     bgColor: "linear-gradient(135deg, #fef3c7, #fed7aa)",
     img: Nijika,
@@ -37,7 +38,7 @@ const characters = [
     animation: "translate(200%, -200%) rotate(90deg)",
   },
   {
-    name: "Ryo Yamada",
+    name: "Ryo",
     color: "linear-gradient(135deg, #2563eb, #4f46e5)",
     bgColor: "linear-gradient(135deg, #dbeafe, #e0e7ff)",
     img: Ryo,
@@ -48,7 +49,7 @@ const characters = [
     animation: "translate(-200%, 200%) rotate(90deg)",
   },
   {
-    name: "Ikuyo Kita",
+    name: "Ikuyo",
     color: "linear-gradient(135deg, #f87171, #fb923c)",
     bgColor: "linear-gradient(135deg, #fecaca, #fed7aa)",
     img: Kita,
@@ -61,8 +62,17 @@ const characters = [
 
 export default function CharacterIntro() {
   const ref = useRef(null);
+  const [openPopup, setOpenPopup] = useState<{
+    open: boolean;
+    type: string | null;
+  }>({ open: false, type: null });
   const cardRef = useRef<(HTMLDivElement | null)[]>([]);
   const wordRef = useRef<(HTMLDivElement | null)[]>([]);
+
+  const goToCurrentSection = () => {
+    const nextSection = document.getElementById("section2");
+    nextSection?.scrollIntoView();
+  };
 
   useIntersectionObserver(ref, 0.9, {
     isEnter: () => {
@@ -126,6 +136,7 @@ export default function CharacterIntro() {
               $animation={character.animation}
               $order={i}
               key={i}
+              onClick={() => setOpenPopup({ open: true, type: character.name })}
             >
               <CharacterCard
                 $bgColor={character.bgColor}
@@ -160,11 +171,19 @@ export default function CharacterIntro() {
         </CharacterGrid>
         {/* <Electronic /> */}
       </Container>
+      <CharacterIntroPopup
+        type={openPopup.type}
+        isOpen={openPopup.open}
+        isClick={(flag) => {
+          setOpenPopup({ type: flag ? openPopup.type : null, open: flag });
+        }}
+      />
     </Section>
   );
 }
 
 const Section = styled.section<{ $background?: string }>`
+  position: relative;
   width: 100%;
   height: 100vh;
   display: flex;
