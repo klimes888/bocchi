@@ -175,7 +175,7 @@ export default function CharacterIntro() {
         type={openPopup.type}
         isOpen={openPopup.open}
         isClick={(flag) => {
-          setOpenPopup({ type: flag ? openPopup.type : null, open: flag });
+          setOpenPopup({ ...openPopup, open: flag });
         }}
       />
     </Section>

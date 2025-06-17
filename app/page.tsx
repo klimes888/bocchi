@@ -17,6 +17,7 @@ import {
   getVoteCounts,
 } from "@/lib/firebase/users";
 import Loading from "@/components/ui/loading";
+import GlobalStyle from "./styled-global";
 
 export default function BocchiLandingPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -25,7 +26,7 @@ export default function BocchiLandingPage() {
   const [voteCount, setvoteCount] = useState<Record<string, number> | null>(
     null
   );
-  console.log("isLoading", isLoading);
+
   useEffect(() => {
     (async () => {
       const count = await getVoteCounts();
@@ -72,30 +73,33 @@ export default function BocchiLandingPage() {
   if (isLoading) return <Loading />;
 
   return (
-    <ThemeProvider theme={theme}>
-      <PageContainer>
-        {/* Hero Section */}
-        <MainSection />
+    <>
+      <GlobalStyle />
+      <ThemeProvider theme={theme}>
+        <PageContainer>
+          {/* Hero Section */}
+          <MainSection />
 
-        {/* Character Introduction */}
-        <CharacterIntro />
+          {/* Character Introduction */}
+          <CharacterIntro />
 
-        {/* Character Popularity Vote Section */}
-        <VoteSection
-          userId={userId}
-          whoVoted={whoVoted}
-          voteCount={voteCount}
-        />
-        {/* YouTube Music Video Carousel */}
-        <MusicSection />
+          {/* Character Popularity Vote Section */}
+          <VoteSection
+            userId={userId}
+            whoVoted={whoVoted}
+            voteCount={voteCount}
+          />
+          {/* YouTube Music Video Carousel */}
+          <MusicSection />
 
-        {/* Guestbook Section */}
-        <Guestbook />
+          {/* Guestbook Section */}
+          <Guestbook />
 
-        {/* Footer */}
-        <Footer />
-      </PageContainer>
-    </ThemeProvider>
+          {/* Footer */}
+          <Footer />
+        </PageContainer>
+      </ThemeProvider>
+    </>
   );
 }
 
