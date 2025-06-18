@@ -49,7 +49,7 @@ export default function BocchiLandingPage() {
     (async () => {
       if (uuid) {
         try {
-          const { user, votes } = await fetchUserDocument(uuid);
+          const { votes } = await fetchUserDocument(uuid);
           const { uid, vote } = votes[0];
 
           setWhoVoted(vote || null);

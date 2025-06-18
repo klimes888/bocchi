@@ -59,4 +59,59 @@ export const animations = {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
   `,
+  wiggle_up: keyframes`
+  from {
+    transform: translateY(-15%) skewX(77deg);
+  }
+  to {
+    transform: translateY(-35%) skewX(98deg);
+  }
+    `,
+  wiggle_middle: keyframes`
+  from {
+    transform: translateY(-85%) skewX(83deg);
+  }
+  to {
+    transform: translateY(-100%) skewX(100deg);
+  } 
+    `,
+
+  glitch_flicker: keyframes`
+    0% {
+      filter: hue-rotate(0deg) contrast(100%) brightness(100%);
+    }
+    20% {
+      filter: hue-rotate(45deg) contrast(130%) brightness(110%);
+    }
+    40% {
+      filter: hue-rotate(-30deg) contrast(90%) brightness(80%);
+    }
+    60% {
+      filter: hue-rotate(20deg) contrast(120%) brightness(120%);
+    }
+    80% {
+      filter: hue-rotate(-10deg) contrast(110%) brightness(90%);
+    }
+    100% {
+      filter: hue-rotate(0deg) contrast(100%) brightness(100%); 
+    }
+    
+  `,
+  glitch_step: keyframes`
+   0% {
+    transform: translate(0, 0);
+  }
+  20% {
+    transform: translate(5px, -2px);
+  }
+  40%, 60%, 70% {
+    transform: translate(0, 0);
+  }
+  80% {
+    transform: translate(-2px, -6px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+`,
 };

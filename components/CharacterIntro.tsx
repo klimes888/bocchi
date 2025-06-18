@@ -10,10 +10,11 @@ import Nijika from "@/assets/characters/Nijika_Ijichi.webp";
 import Kita from "@/assets/characters/Ikuyo_Kita.webp";
 import Ryo from "@/assets/characters/Ryo_Yamada.webp";
 import { useIntersectionObserver } from "./useIntersection";
-import { useRef, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 
 import Back from "../assets/background.jpg";
 import CharacterIntroPopup from "./CharacterIntro_Popup";
+import { animations } from "@/lib/styled-animations";
 
 // Character data with their signature colors
 const characters = [
@@ -64,15 +65,13 @@ export default function CharacterIntro() {
   const ref = useRef(null);
   const [openPopup, setOpenPopup] = useState<{
     open: boolean;
-    type: string | null;
-  }>({ open: false, type: null });
+    type: string;
+  }>({ open: false, type: "" });
+
+  const [glitch, setGlitch] = useState<string | null>(null);
+  const [isTouch, setIsTouch] = useState(false);
   const cardRef = useRef<(HTMLDivElement | null)[]>([]);
   const wordRef = useRef<(HTMLDivElement | null)[]>([]);
-
-  const goToCurrentSection = () => {
-    const nextSection = document.getElementById("section2");
-    nextSection?.scrollIntoView();
-  };
 
   useIntersectionObserver(ref, 0.9, {
     isEnter: () => {
@@ -128,14 +127,27 @@ export default function CharacterIntro() {
           ))}
         </SectionTitleWrap>
         <CharacterGrid>
+          {glitch && (
+            <>
+              <WiggleUi
+                style={{
+                  background: glitch,
+                }}
+              />
+              <WiggleUi2 style={{ background: glitch }} />
+            </>
+          )}
+
           {characters.map((character, i) => (
             <CardLayout
+              key={i}
               ref={(el) => {
                 cardRef.current[i] = el;
               }}
               $animation={character.animation}
               $order={i}
-              key={i}
+              onMouseEnter={() => setGlitch(character.color)}
+              onMouseLeave={() => setGlitch(null)}
               onClick={() => setOpenPopup({ open: true, type: character.name })}
             >
               <CharacterCard
@@ -181,6 +193,22 @@ export default function CharacterIntro() {
     </Section>
   );
 }
+
+const WiggleUi = styled.div`
+  display: flex;
+  position: absolute;
+  top: 50%;
+  left: 45%;
+  bottom: 0;
+  right: 0;
+  width: 20%;
+  height: 2em;
+  animation: ${animations.wiggle_up} 0.2s infinite;
+`;
+
+const WiggleUi2 = styled(WiggleUi)`
+  animation: ${animations.wiggle_middle} 0.2s infinite;
+`;
 
 const Section = styled.section<{ $background?: string }>`
   position: relative;
@@ -233,6 +261,7 @@ const Container = styled.div`
 `;
 
 const CharacterGrid = styled.div`
+  position: relative;
   display: grid;
   width: 100%;
   grid-template-columns: repeat(2, 1fr);
@@ -305,6 +334,7 @@ const CharaImage = styled(Image)<{ $pos?: { top: string; left: string } }>`
   object-position: center top;
   transform: translateY(0) scale(1);
   transition: all 0.5s ease;
+  z-index: 1;
 `;
 
 const BlurCharaImage = styled(CharaImage)<{
@@ -313,13 +343,14 @@ const BlurCharaImage = styled(CharaImage)<{
   filter: brightness(0) saturate(100%);
   transform: translateY(1em) scale(1.08);
   transition: all 0.5s ease;
+  z-index: 0;
 `;
 
 const CardLayout = styled.div<{ $animation: string; $order: number }>`
   position: relative;
-  opacity: 0;
   transform: ${({ $animation }) => $animation};
   transition: all 0.6s ${({ $order }) => `${$order * 100}`}ms ease;
+  z-index: 1;
 `;
 
 const CharacterCard = styled(Card)<{
@@ -361,8 +392,13 @@ const CharacterCard = styled(Card)<{
     }
 
     ${CharaImage} {
-      transform: translate(0, 0) scale(1.05);
-      transition: all 0.5s ease;
+      animation: ${animations.glitch_flicker} 0.5s infinite;
+      transform: scale(1.05);
+      /* transition: all 0.5s ease; */
+    }
+
+    ${CharacterAvatar} {
+      animation: ${animations.glitch_step} 0.5s steps(4, end) infinite;
     }
   }
 
