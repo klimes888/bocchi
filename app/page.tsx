@@ -3,7 +3,7 @@ import type React from "react";
 import styled, { ThemeProvider } from "styled-components";
 
 import { theme } from "@/lib/styled-theme";
-import MusicSection from "@/components/MusicSection";
+import VideoSection from "@/components/VideoSection";
 import VoteSection from "@/components/VoteSection";
 import CharacterIntro from "@/components/CharacterIntro";
 import Guestbook from "@/components/Guestbook";
@@ -90,7 +90,7 @@ export default function BocchiLandingPage() {
             voteCount={voteCount}
           />
           {/* YouTube Music Video Carousel */}
-          <MusicSection />
+          <VideoSection />
 
           {/* Guestbook Section */}
           <Guestbook />
@@ -111,3 +111,4 @@ const PageContainer = styled.div`
   background: ${(props) => props.theme.colors.gradients.background};
   transform-style: preserve-3d;
 `;
+

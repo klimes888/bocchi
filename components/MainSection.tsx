@@ -15,7 +15,7 @@ import ParticleBackground from "./ui/canvas-animation";
 
 export default function MainSection() {
   // hooks
-  useDragDetect({ threshold: 20, curPos: "section1", where: "section2" });
+  useDragDetect({ threshold: 10, curPos: "section1", where: "section2" });
 
   const goToNextSection = () => {
     const nextSection = document.getElementById("section2");

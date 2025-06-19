@@ -13,14 +13,29 @@ export function useDragDetect({
   const startY = useRef<number | null>(null);
   const deltaYSum = useRef(0);
   const wheelTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollLockTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const lockScroll = () => {
+    document.body.style.overflow = "hidden";
+  };
+
+  const unlockScroll = () => {
+    document.body.style.overflow = "";
+  };
 
   useLayoutEffect(() => {
     const section = document.getElementById(curPos);
     if (!section) return;
 
     const goToNextSection = () => {
+      lockScroll();
       const nextSection = document.getElementById(where);
       nextSection?.scrollIntoView({ behavior: "smooth" });
+
+      if (scrollLockTimeout.current) clearTimeout(scrollLockTimeout.current);
+      scrollLockTimeout.current = setTimeout(() => {
+        unlockScroll();
+      }, 1000); // 1초 후 스크롤 다시 허용
     };
 
     // 터치 이벤트
@@ -76,6 +91,7 @@ export function useDragDetect({
       section.removeEventListener("mousedown", handleMouseDown);
       section.removeEventListener("mouseup", handleMouseUp);
       section.removeEventListener("wheel", handleWheel);
+      unlockScroll();
       if (wheelTimeout.current) clearTimeout(wheelTimeout.current);
     };
   }, [curPos, where, threshold]);

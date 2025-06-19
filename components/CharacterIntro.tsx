@@ -1,6 +1,6 @@
 "use client";
 import type React from "react";
-import styled, { keyframes } from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
 
@@ -15,13 +15,17 @@ import { Fragment, useRef, useState } from "react";
 import Back from "../assets/background.jpg";
 import CharacterIntroPopup from "./CharacterIntro_Popup";
 import { animations } from "@/lib/styled-animations";
+import { useDragDetect } from "@/hooks/use-drag";
 
 // Character data with their signature colors
+
 const characters = [
   {
     name: "Hitori",
     color: "linear-gradient(135deg, #f472b6, #FD02FE)",
     bgColor: "linear-gradient(135deg, #fce7f3, #dbeafe)",
+    radiColor:
+      "radial-gradient(circle, rgba(97, 53, 75, 0.1) 70%, rgba(154, 76, 154, 0.3), rgba(253, 2, 254, 0.3)) transparent 90%",
     img: Hitori,
     polygon: "polygon(2% 3%, 97% 0%, 98% 95%, 0% 98%)",
     rotate: "2deg",
@@ -32,6 +36,8 @@ const characters = [
     name: "Nijika",
     color: "linear-gradient(135deg, #facc15, #fb923c)",
     bgColor: "linear-gradient(135deg, #fef3c7, #fed7aa)",
+    radiColor:
+      "radial-gradient(circle, rgba(181, 158, 69, 0.1) 70%, rgba(177, 122, 77, 0.3), rgba(251, 181, 60, 0.3)) transparent 90%",
     img: Nijika,
     polygon: "polygon(0% 5%, 95% 0%, 100% 90%, 5% 100%)",
     rotate: "1deg",
@@ -42,6 +48,8 @@ const characters = [
     name: "Ryo",
     color: "linear-gradient(135deg, #2563eb, #4f46e5)",
     bgColor: "linear-gradient(135deg, #dbeafe, #e0e7ff)",
+    radiColor:
+      "radial-gradient(circle, rgba(72, 98, 154, 0.1) 70%, rgba(85, 118, 188, 0.3), rgba(76, 69, 225, 0.3)) transparent 90%",
     img: Ryo,
     pos: { top: "2em", left: "1.5em" },
     polygon: "polygon(2% 4%, 97% 7%, 95% 93%, 5% 96%)",
@@ -53,6 +61,8 @@ const characters = [
     name: "Ikuyo",
     color: "linear-gradient(135deg, #f87171, #fb923c)",
     bgColor: "linear-gradient(135deg, #fecaca, #fed7aa)",
+    radiColor:
+      "radial-gradient(circle, rgba(202, 105, 105, 0.1) 70%, rgba(223, 96, 58, 0.3), rgba(204, 57, 38, 0.3)) transparent 90%",
     img: Kita,
     polygon: "polygon(2% 4%, 97% 7%, 95% 93%, 5% 96%)",
     rotate: "0deg",
@@ -68,8 +78,10 @@ export default function CharacterIntro() {
     type: string;
   }>({ open: false, type: "" });
 
+  useDragDetect({ threshold: 20, curPos: "section2", where: "section3" });
+
   const [glitch, setGlitch] = useState<string | null>(null);
-  const [isTouch, setIsTouch] = useState(false);
+  const [radiColor, setRadiColor] = useState<string | null>(null);
   const cardRef = useRef<(HTMLDivElement | null)[]>([]);
   const wordRef = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -109,80 +121,90 @@ export default function CharacterIntro() {
   });
 
   const titleWord = ["K", "e", "s", "s", "o", "k", "u", "", "B", "a", "n", "d"];
-
   return (
-    <Section id="section2" ref={ref}>
-      <Container>
-        <SectionTitleWrap $url={Back.src}>
-          {titleWord.map((word, i) => (
-            <SectionTitle
-              key={i}
-              ref={(el) => {
-                wordRef.current[i] = el;
-              }}
-              $order={i}
-            >
-              {word !== "" ? word : " "}
-            </SectionTitle>
-          ))}
-        </SectionTitleWrap>
-        <CharacterGrid>
-          {glitch && (
-            <>
-              <WiggleUi
-                style={{
-                  background: glitch,
+    <FragDiv>
+      <Section id="section2" ref={ref}>
+        <SectionInner $radiColor={radiColor} />
+        <Container>
+          <SectionTitleWrap $url={Back.src}>
+            {titleWord.map((word, i) => (
+              <SectionTitle
+                key={i}
+                ref={(el) => {
+                  wordRef.current[i] = el;
                 }}
-              />
-              <WiggleUi2 style={{ background: glitch }} />
-            </>
-          )}
-
-          {characters.map((character, i) => (
-            <CardLayout
-              key={i}
-              ref={(el) => {
-                cardRef.current[i] = el;
-              }}
-              $animation={character.animation}
-              $order={i}
-              onMouseEnter={() => setGlitch(character.color)}
-              onMouseLeave={() => setGlitch(null)}
-              onClick={() => setOpenPopup({ open: true, type: character.name })}
-            >
-              <CharacterCard
-                $bgColor={character.bgColor}
-                $color={character.color}
-                $bdColor={character.bdColor}
+                $order={i}
               >
-                <ContentInner $color={character.color}>
-                  <CharacterLayoutOut>
-                    <SquareLayout $color={character.bdColor} />
-                    <SmallSquare $color={character.bdColor} />
-                    <CharacterLayout
-                      $polygon={character.polygon}
-                      $rotate={character.rotate}
-                    />
-                  </CharacterLayoutOut>
-                  <CharacterAvatar>
-                    <BlurCharaImage
-                      src={character.img}
-                      alt={character.name}
-                      $pos={character?.pos}
-                    />
-                    <CharaImage
-                      src={character.img}
-                      alt={character.name}
-                      $pos={character?.pos}
-                    />
-                  </CharacterAvatar>
-                </ContentInner>
-              </CharacterCard>
-            </CardLayout>
-          ))}
-        </CharacterGrid>
-        {/* <Electronic /> */}
-      </Container>
+                {word !== "" ? word : " "}
+              </SectionTitle>
+            ))}
+          </SectionTitleWrap>
+          <CharacterGrid>
+            {glitch && (
+              <>
+                <WiggleUi
+                  style={{
+                    background: glitch,
+                  }}
+                />
+                <WiggleUi2 style={{ background: glitch }} />
+              </>
+            )}
+
+            {characters.map((character, i) => (
+              <CardLayout
+                key={i}
+                ref={(el) => {
+                  cardRef.current[i] = el;
+                }}
+                $animation={character.animation}
+                $order={i}
+                onMouseEnter={() => {
+                  setGlitch(character.color);
+                  setRadiColor(character.radiColor);
+                }}
+                onMouseLeave={() => {
+                  setGlitch(null);
+                  setRadiColor(null);
+                }}
+                onClick={() =>
+                  setOpenPopup({ open: true, type: character.name })
+                }
+              >
+                <CharacterCard
+                  $bgColor={character.bgColor}
+                  $color={character.color}
+                  $bdColor={character.bdColor}
+                >
+                  <ContentInner $color={character.color}>
+                    <CharacterLayoutOut>
+                      <SquareLayout $color={character.bdColor} />
+                      <SmallSquare $color={character.bdColor} />
+                      <CharacterLayout
+                        $polygon={character.polygon}
+                        $rotate={character.rotate}
+                      />
+                    </CharacterLayoutOut>
+                    <CharacterAvatar>
+                      <BlurCharaImage
+                        src={character.img}
+                        alt={character.name}
+                        $pos={character?.pos}
+                      />
+                      <CharaImage
+                        src={character.img}
+                        alt={character.name}
+                        $pos={character?.pos}
+                      />
+                    </CharacterAvatar>
+                  </ContentInner>
+                </CharacterCard>
+              </CardLayout>
+            ))}
+          </CharacterGrid>
+          {/* <Electronic /> */}
+        </Container>
+      </Section>
       <CharacterIntroPopup
         type={openPopup.type}
         isOpen={openPopup.open}
@@ -190,7 +212,7 @@ export default function CharacterIntro() {
           setOpenPopup({ ...openPopup, open: flag });
         }}
       />
-    </Section>
+    </FragDiv>
   );
 }
 
@@ -210,15 +232,32 @@ const WiggleUi2 = styled(WiggleUi)`
   animation: ${animations.wiggle_middle} 0.2s infinite;
 `;
 
-const Section = styled.section<{ $background?: string }>`
+const FragDiv = styled.div`
   position: relative;
   width: 100%;
   height: 100vh;
+  background-color: #000;
+`;
+
+const Section = styled.section`
+  position: relative;
   display: flex;
+  width: 100%;
+  height: 100%;
   align-items: center;
   justify-content: center;
-  background-color: #000;
   overflow: hidden;
+`;
+
+const SectionInner = styled.div<{ $radiColor: string | null }>`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: ${({ $radiColor }) => $radiColor};
+  transition: opacity 0.3s ease;
+  opacity: ${({ $radiColor }) => ($radiColor ? 1 : 0)};
 `;
 
 const SectionTitleWrap = styled.div<{ $url: string }>`

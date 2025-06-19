@@ -144,10 +144,12 @@ const CharacterIntroPopup = (props: Props) => {
 const Layout = styled.div<{ $open: boolean }>`
   display: flex;
   position: fixed;
+  top: 0;
   left: 0;
   right: 0;
-  width: 100%;
-  height: 100vh;
+  bottom: 0;
+  /* width: 100%; */
+  /* height: 100vh; */
   justify-content: flex-start;
   align-items: center;
   background-color: rgba(0, 0, 0, 0.5);
@@ -160,17 +162,15 @@ const Layout = styled.div<{ $open: boolean }>`
 `;
 const ScrollWrapper = styled.div`
   position: fixed;
-  left: 0;
   width: 100%;
   overflow-y: scroll;
 `;
 
 const Popup = styled.div<{ $open: boolean }>`
   position: fixed;
-  left: 0;
   display: flex;
   width: 100vw;
-  height: 100vh;
+  /* height: 100vh; */
   background-color: #fff;
   transform: rotate(${({ $open }) => ($open ? "0" : "90deg")});
   transform-origin: left top;

@@ -129,7 +129,7 @@ export default function VoteSection(props: Props) {
   }, [voteCount]);
 
   return (
-    <SectionLayout>
+    <SectionLayout id="section3">
       <Container>
         <SectionTitle>최애 선정하기</SectionTitle>
         {/* <p className="description">Who's your favorite Kessoku Band member?</p> */}
