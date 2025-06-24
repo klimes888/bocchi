@@ -28,6 +28,7 @@ export default function BocchiLandingPage() {
   );
 
   useEffect(() => {
+    /** 총 투표 수 들고오기 */
     (async () => {
       const count = await getVoteCounts();
       setvoteCount(count);
@@ -46,6 +47,7 @@ export default function BocchiLandingPage() {
       }
     };
 
+    /** 파이어베이스 투표 데이터 들고 오기 */
     (async () => {
       if (uuid) {
         try {
@@ -58,6 +60,7 @@ export default function BocchiLandingPage() {
           resistUser();
         }
       } else {
+        // 유저가 없는 경우 유저 등록
         resistUser();
       }
     })();
@@ -111,4 +114,3 @@ const PageContainer = styled.div`
   background: ${(props) => props.theme.colors.gradients.background};
   transform-style: preserve-3d;
 `;
-

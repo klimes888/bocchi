@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styled, { css } from "styled-components";
 import { Heart, Star } from "lucide-react";
 import Image from "next/image";
@@ -24,6 +24,11 @@ import Nijika from "@/assets/votes/nijika.jpg";
 import Ryo from "@/assets/votes/ryo.jpg";
 import Hitori from "@/assets/votes/hitori.jpg";
 import Kita from "@/assets/votes/kita.jpg";
+import { useIntersectionObserver } from "./useIntersection";
+import { InfinityShape } from "./animation/infinity.shape";
+
+const NUM_ROWS = 10;
+const NUM_COLS = 10;
 
 // Character data with their signature colors
 const characters = [
@@ -83,13 +88,96 @@ interface Props {
   voteCount: Record<string, number> | null;
 }
 
+const theme: Record<string, string> = {
+  Kita: "#f56969",
+  Ryo: "#4e84f7",
+  Nijika: "#facc15",
+  Bocchi: "#f68ac2",
+};
+
 export default function VoteSection(props: Props) {
   const { userId, whoVoted, voteCount } = props;
-  const [mouseEnter, setMouseEnter] = useState<number | null>(null);
   const [itemList, setItemList] = useState(characters);
   const [votedCharacter, setVotedCharacter] = useState<number | null>(null);
-
+  const [mouseEnter, setMouseEnter] = useState<number | null>(null);
+  const [gridHoverType, setGridHoverType] = useState(characters[0].nickname);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [loadPage, setLoadPage] = useState(false);
+
+  const ref = useRef<HTMLDivElement | null>(null);
+  const titleWrapref = useRef<HTMLDivElement | null>(null);
+  const cardRef = useRef<(HTMLDivElement | null)[]>([]);
+  const wordRef = useRef<(HTMLDivElement | null)[]>([]);
+
+  const wordAniamtionHandle = (isFirst: boolean) => {
+    wordRef.current.forEach((el) => {
+      if (!el) return;
+      if (isFirst) {
+        el.style.height = "15rem";
+      } else {
+        el.style.height = "0";
+      }
+      // el.style.opacity = "1";
+    });
+  };
+
+  const wordSmallHandler = (isFirst: boolean) => {
+    wordRef.current.forEach((el) => {
+      if (!el) return;
+      if (isFirst) {
+        el.style.fontSize = "4rem";
+      } else {
+      }
+    });
+  };
+
+  const cardWrapHandler = (isFirst: boolean) => {
+    cardRef.current.forEach((el) => {
+      if (!el) return;
+      if (isFirst) {
+        el.style.height = "17.5rem";
+        el.style.boxShadow = "0 1em 1em 0.25em rgba(0, 0, 0, 0.3)";
+      } else {
+        el.style.height = "0";
+        el.style.boxShadow = "none";
+      }
+    });
+  };
+
+  const titleWrapAnimationHandler = (isFirst: boolean) => {
+    if (isFirst) {
+      setTimeout(() => {
+        wordSmallHandler(true);
+      }, 1000);
+    }
+
+    if (!titleWrapref.current) return;
+    if (isFirst) {
+      titleWrapref.current.style.transform = "translate(-50%, -140%)";
+    } else {
+    }
+  };
+
+  useIntersectionObserver(ref, 0.9, {
+    isEnter: () => {
+      setLoadPage(true);
+      requestAnimationFrame(() => {
+        wordAniamtionHandle(true);
+        titleWrapAnimationHandler(true);
+        cardWrapHandler(true);
+      });
+    },
+  });
+
+  useIntersectionObserver(ref, 0.2, {
+    elseFunc: () => {
+      setLoadPage(false);
+      requestAnimationFrame(() => {
+        wordAniamtionHandle(false);
+        cardWrapHandler(false);
+      });
+    },
+  });
 
   const handleVote = async (characterIndex: number) => {
     if (votedCharacter !== null || !userId) return;
@@ -128,16 +216,42 @@ export default function VoteSection(props: Props) {
     setItemList(result);
   }, [voteCount]);
 
+  const words = ["최", "애", "", "선", "정", "하", "기"];
+
+  if (!loadPage) return <SectionLayout id="section3" ref={ref}></SectionLayout>;
+
   return (
-    <SectionLayout id="section3">
+    <SectionLayout id="section3" ref={ref}>
+      <InfinityShape theme={theme[gridHoverType]} />
       <Container>
-        <SectionTitle>최애 선정하기</SectionTitle>
+        <SectionTitleWrap ref={titleWrapref}>
+          {words.map((word, i) => (
+            <SectionTitle
+              key={i}
+              color={theme[gridHoverType]}
+              ref={(el) => {
+                wordRef.current[i] = el;
+              }}
+              $order={i}
+              $blank={word === ""}
+            >
+              <h2>{word}</h2>
+            </SectionTitle>
+          ))}
+        </SectionTitleWrap>
         {/* <p className="description">Who's your favorite Kessoku Band member?</p> */}
         <VoteGrid>
           {itemList.map((character, i) => (
             <VoteCard
               key={character.id}
-              onMouseEnter={() => setMouseEnter(character.id)}
+              ref={(el) => {
+                cardRef.current[i] = el;
+              }}
+              oerder={i}
+              onMouseEnter={() => {
+                setMouseEnter(character.id);
+                setGridHoverType(character.nickname);
+              }}
               onMouseLeave={() => setMouseEnter(null)}
             >
               <CardContent style={{ padding: "1.5rem", textAlign: "center" }}>
@@ -196,25 +310,60 @@ export default function VoteSection(props: Props) {
 
 // Styled Components
 const Section = styled.section<{ $background?: string }>`
-  padding: 4rem 1rem;
+  position: relative;
+  /* padding: 4rem 1rem; */
+  width: 100%;
+  height: 100vh;
   ${(props) => props.$background && `background: ${props.$background};`}
   z-index: 3;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
-const SectionTitle = styled.h2`
-  font-size: 2.25rem;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 3rem;
+const Container = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 100rem;
+  width: 100%;
+  height: 100%;
+`;
+
+const SectionTitleWrap = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: row;
+  transition: transform 0.5s 1s ease;
   background: ${(props) => props.theme.colors.gradients.text};
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
 `;
 
-const Container = styled.div`
-  max-width: 80rem;
-  margin: 0 auto;
+const SectionTitle = styled.div<{
+  $order: number;
+  $blank: boolean;
+  color: string;
+}>`
+  width: ${({ $blank }) => ($blank ? "0.3rem" : "auto")};
+  height: 0;
+  overflow: hidden;
+  transition: height 0.5s ${({ $order }) => `${0.1 * $order}s`} ease;
+  font-size: 10rem;
+
+  h2 {
+    font-weight: bold;
+    text-align: center;
+    transition: font-size 0.5s ease;
+    font-size: 4rem;
+    color: #fff;
+    text-shadow: 0 0 4px ${({ color }) => color},
+      0 0 8px ${({ color }) => color};
+  }
 `;
 
 const SectionLayout = styled(Section)`
@@ -228,10 +377,9 @@ const SectionLayout = styled(Section)`
 const VoteGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.5rem;
-  max-width: 6xl;
+  gap: 1rem;
+  width: 100%;
   margin: 0 auto;
-
   @media (min-width: ${(props) => props.theme.breakpoints.md}) {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -241,13 +389,17 @@ const VoteGrid = styled.div`
   }
 `;
 
-const VoteCard = styled(Card)`
+const VoteCard = styled(Card)<{ oerder: number }>`
   background: ${(props) => props.theme.colors.white};
-  border: 2px solid ${(props) => props.theme.colors.gray[200]};
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  box-shadow: none;
+  width: 100%;
+  height: 0;
+  background-color: #fff;
+  transition: height 0.5s ${({ oerder }) => `1.${oerder + 6}s`} ease,
+    box-shadow 0.5s ${({ oerder }) => `1.${oerder + 6}s`} ease;
   border-radius: 0.25em;
   overflow: hidden;
+  z-index: 9;
   &:hover {
     box-shadow: 0 25px 25px -5px rgba(0, 0, 0, 0.1);
   }
@@ -342,4 +494,9 @@ const ImageWrap = styled(Image)<{ $isVisible: boolean }>`
   object-fit: cover;
   transition: opacity 0.5s ease;
   opacity: ${({ $isVisible }) => ($isVisible ? 1 : 0)};
+`;
+
+const Dummy = styled.div`
+  width: 2.65rem;
+  height: 1rem;
 `;
