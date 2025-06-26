@@ -26,6 +26,7 @@ import Hitori from "@/assets/votes/hitori.jpg";
 import Kita from "@/assets/votes/kita.jpg";
 import { useIntersectionObserver } from "./useIntersection";
 import { InfinityShape } from "./animation/infinity.shape";
+import { useDragDetect } from "@/hooks/use-drag";
 
 const NUM_ROWS = 10;
 const NUM_COLS = 10;
@@ -109,6 +110,8 @@ export default function VoteSection(props: Props) {
   const cardRef = useRef<(HTMLDivElement | null)[]>([]);
   const wordRef = useRef<(HTMLDivElement | null)[]>([]);
 
+  useDragDetect({ threshold: 20, curPos: "section3", where: "section4" });
+
   const wordAniamtionHandle = (isFirst: boolean) => {
     wordRef.current.forEach((el) => {
       if (!el) return;
@@ -158,7 +161,7 @@ export default function VoteSection(props: Props) {
     }
   };
 
-  useIntersectionObserver(ref, 0.9, {
+  useIntersectionObserver(ref, 0.95, {
     isEnter: () => {
       setLoadPage(true);
       requestAnimationFrame(() => {
@@ -169,7 +172,7 @@ export default function VoteSection(props: Props) {
     },
   });
 
-  useIntersectionObserver(ref, 0.2, {
+  useIntersectionObserver(ref, 0.05, {
     elseFunc: () => {
       setLoadPage(false);
       requestAnimationFrame(() => {

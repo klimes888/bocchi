@@ -18,6 +18,7 @@ import {
 } from "@/lib/firebase/users";
 import Loading from "@/components/ui/loading";
 import GlobalStyle from "./styled-global";
+import AudioSection from "@/components/AudioSection";
 
 export default function BocchiLandingPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -81,19 +82,21 @@ export default function BocchiLandingPage() {
       <ThemeProvider theme={theme}>
         <PageContainer>
           {/* Hero Section */}
-          <MainSection />
+          {/* <MainSection /> */}
 
           {/* Character Introduction */}
-          <CharacterIntro />
+          {/* <CharacterIntro /> */}
 
           {/* Character Popularity Vote Section */}
-          <VoteSection
+          {/* <VoteSection
             userId={userId}
             whoVoted={whoVoted}
             voteCount={voteCount}
-          />
+          /> */}
+          <Dummy />
+          <AudioSection frontSection={1} />
           {/* YouTube Music Video Carousel */}
-          <VideoSection />
+          {/* <VideoSection /> */}
 
           {/* Guestbook Section */}
           <Guestbook />
@@ -113,4 +116,11 @@ const PageContainer = styled.div`
   min-height: 100vh;
   background: ${(props) => props.theme.colors.gradients.background};
   transform-style: preserve-3d;
+`;
+
+const Dummy = styled.div`
+  width: 100%;
+  height: 100vh;
+  background-color: #999;
+  border-bottom: 1px solid red;
 `;
