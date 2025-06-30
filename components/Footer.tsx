@@ -16,7 +16,7 @@ export default function Footer() {
           <Music />
           <Mic />
         </div>
-        <p className="main-text">© 2024 Bocchi the Rock! Fan Page</p>
+        <p className="main-text">© 2025 Bocchi the Rock! Fan Page</p>
         <p className="sub-text">Made with ❤️ for all Kessoku Band fans</p>
         <p className="disclaimer">
           This is a fan-made tribute page. All rights belong to their respective

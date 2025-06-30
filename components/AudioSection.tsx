@@ -151,11 +151,11 @@ export default function AudioSection({ frontSection }: Props) {
     if (!firstClick) return;
 
     const curSecStart = -(frontSection * window.innerHeight) + scrollX;
-    if (curSecStart >= maxHeight - window.innerHeight / 2.4) {
+    if (-curSecStart >= window.innerHeight / 2.4) {
+      // 스크롤 위로 올렸을 때,
       setIsAllowedToPlay(false);
       setActiveIndex(null);
-    } else if (-curSecStart >= window.innerHeight / 2.4) {
-      // 스크롤 위로 올렸을 때,
+    } else if (curSecStart > maxHeight - window.innerWidth) {
       setIsAllowedToPlay(false);
       setActiveIndex(null);
     } else {
@@ -165,36 +165,27 @@ export default function AudioSection({ frontSection }: Props) {
 
   useEffect(() => {
     if (!innerRef.current) return;
-    const maxScroll = innerRef.current.scrollWidth + window.innerWidth;
-    setMaxHeight(maxScroll / 1.2);
+    const maxScroll = innerRef.current.scrollWidth + window.innerWidth / 1.2;
+    setMaxHeight(maxScroll);
+  }, []);
 
-    const handleWheel = (e: WheelEvent) => {
-      setScrollX((prev) => {
-        const next = Math.min(Math.max(prev + e.deltaY, 0), maxScroll);
-        return next;
-      });
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setScrollX(scrollY);
     };
 
-    // sectionRef.current.addEventListener("wheel", handleWheel, {
-    window.addEventListener("wheel", handleWheel, {
-      passive: false,
-    });
-
-    return () => {
-      window.removeEventListener("wheel", handleWheel);
-    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
     if (!innerRef.current) return;
-    const item = innerRef.current.children[0].getBoundingClientRect();
-    const isize = item.width / 2;
     // 이전 섹션들 width 만큼 오른쪽으로 이동
     const prevSectionW = frontSection * window.innerWidth;
-    // 아이템 절반
-    const curSectionW = isize / 2;
-    const result = prevSectionW - curSectionW;
-    innerRef.current.style.transform = `translateX(${result - scrollX}px)`;
+    innerRef.current.style.transform = `translateX(${
+      prevSectionW - window.innerWidth - scrollX
+    }px)`;
 
     const containerCenter = window.innerWidth / 2;
     const children = Array.from(innerRef.current.children);
@@ -202,7 +193,7 @@ export default function AudioSection({ frontSection }: Props) {
     let closestIndex = 0;
     let minDistance = Infinity;
 
-    if (prevSectionW / 2 >= scrollX) return;
+    // if (prevSectionW / 2 >= scrollX) return;
     children.forEach((child, index) => {
       const rect = child.getBoundingClientRect();
       const itemCenter = rect.left + rect.width / 2;
@@ -234,7 +225,7 @@ export default function AudioSection({ frontSection }: Props) {
       }
     });
   }, [activeIndex, isAllowedToPlay]);
-
+  // console.log("scrollx", scrollX);
   return (
     <Section id="section4" ref={sectionRef} $height={maxHeight}>
       <HorizontalSection>
@@ -279,7 +270,7 @@ export default function AudioSection({ frontSection }: Props) {
             setFirstClick(true);
           }}
         >
-          <LottieFile />
+          {/* <LottieFile /> */}
         </InteractWrap>
       )}
     </Section>
@@ -317,6 +308,7 @@ const HorizontalSection = styled.div`
 const HorizontalInner = styled.div`
   display: flex;
   column-gap: 12rem;
+  animation: transform 0.8s ease;
 `;
 
 const ItemLayout = styled.div<{

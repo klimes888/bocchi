@@ -3,7 +3,7 @@ import type React from "react";
 import styled, { ThemeProvider } from "styled-components";
 
 import { theme } from "@/lib/styled-theme";
-import VideoSection from "@/components/VideoSection";
+
 import VoteSection from "@/components/VoteSection";
 import CharacterIntro from "@/components/CharacterIntro";
 import Guestbook from "@/components/Guestbook";
@@ -19,6 +19,7 @@ import {
 import Loading from "@/components/ui/loading";
 import GlobalStyle from "./styled-global";
 import AudioSection from "@/components/AudioSection";
+import ImageSection from "@/components/ImageSection";
 
 export default function BocchiLandingPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -82,22 +83,24 @@ export default function BocchiLandingPage() {
       <ThemeProvider theme={theme}>
         <PageContainer>
           {/* Hero Section */}
-          {/* <MainSection /> */}
+          <MainSection />
 
           {/* Character Introduction */}
-          {/* <CharacterIntro /> */}
+          <CharacterIntro />
 
           {/* Character Popularity Vote Section */}
-          {/* <VoteSection
+          <VoteSection
             userId={userId}
             whoVoted={whoVoted}
             voteCount={voteCount}
-          /> */}
-          <Dummy />
-          <AudioSection frontSection={1} />
+          />
+          {/* <Dummy /> */}
+          <AudioSection frontSection={3} />
           {/* YouTube Music Video Carousel */}
           {/* <VideoSection /> */}
-
+          {/* <Dummy /> */}
+          {/* Image List */}
+          <ImageSection />
           {/* Guestbook Section */}
           <Guestbook />
 
