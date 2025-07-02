@@ -1,8 +1,6 @@
+import { useBreakpoint } from "@/hooks/use-breakpoint";
 import React, { useEffect, useRef, useState } from "react";
 import styled, { css, keyframes } from "styled-components";
-
-const NUM_ROWS = 80;
-const NUM_COLS = 80;
 
 const predefinedBounce = Array.from({ length: 10 }).map((_, i) => {
   const scaleStart = 0.2 * i;
@@ -21,6 +19,25 @@ const predefinedBounce = Array.from({ length: 10 }).map((_, i) => {
 });
 
 export const InfinityShape = ({ theme }: { theme: string }) => {
+  let NUM_ROWS = 80;
+  let NUM_COLS = 80;
+  const breakPoint = useBreakpoint();
+
+  switch (breakPoint) {
+    case "desktop":
+      NUM_ROWS = 80;
+      NUM_COLS = 120;
+      break;
+
+    case "mobile":
+      NUM_ROWS = 70;
+      NUM_COLS = 80;
+      break;
+
+    default:
+      break;
+  }
+
   const getSizeRef = useRef<HTMLDivElement | null>(null);
   const [getHeight, setGetHeight] = useState(0);
 

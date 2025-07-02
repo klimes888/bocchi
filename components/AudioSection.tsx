@@ -225,7 +225,7 @@ export default function AudioSection({ frontSection }: Props) {
       }
     });
   }, [activeIndex, isAllowedToPlay]);
-  // console.log("scrollx", scrollX);
+
   return (
     <Section id="section4" ref={sectionRef} $height={maxHeight}>
       <HorizontalSection>
@@ -295,7 +295,8 @@ const Section = styled.section<{ $height: number }>`
   width: 100%;
   height: ${({ $height }) => $height}px;
   display: flex;
-  background: ${(props) => props.theme.colors.gradients.background};
+  background: linear-gradient(180deg, #fdf2f8, #fefce8, #222);
+  padding-bottom: 30em;
 `;
 
 const HorizontalSection = styled.div`
@@ -303,6 +304,7 @@ const HorizontalSection = styled.div`
   position: sticky;
   top: 0;
   height: 100vh;
+  overflow: hidden;
 `;
 
 const HorizontalInner = styled.div`
