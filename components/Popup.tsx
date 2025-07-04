@@ -79,19 +79,28 @@ const AuthContent = ({
       setAlert(null);
       setChangeAuth(false);
     } else if (result?.code === USER_ALREADY) {
-      setAlert({ target: "id", text: "이미 존재하는 아이디입니다." });
+      setAlert({ target: "id", text: "이미 발행 된 티켓입니다." });
     } else {
       setAlert({ target: "id", text: "무언가 잘 못 되었습니다." });
     }
   };
 
   const submitLoginHandle = async () => {
+    const { SUCCESS, USER_NOT_EXSIST, USER_INFO_INCORRECT } =
+      FIREBASE_ERROR_CODE;
     const valid = validateHandle();
     if (!valid) return;
     const result = await loginUser(auth);
-    if (result) {
+
+    if (result?.code === SUCCESS) {
       setAlert(null);
-      // setAnimate(true);
+      setChangeAuth(false);
+    } else if (result?.code === USER_NOT_EXSIST) {
+      setAlert({ target: "id", text: "티켓이 존재하지 않습니다." });
+    } else if (result?.code === USER_INFO_INCORRECT) {
+      setAlert({ target: "id", text: "티켓정보가 정확하지 않습니다." });
+    } else {
+      setAlert({ target: "id", text: "무언가 잘 못 되었습니다." });
     }
   };
 
@@ -261,11 +270,11 @@ export const AuthDialog = ({
     }
   }, [open]);
 
-  useEffect(() => {
-    if (createUser) {
-      setChangeAuth(false);
-    }
-  }, [createUser]);
+  // useEffect(() => {
+  //   if (createUser) {
+  //     setChangeAuth(false);
+  //   }
+  // }, [createUser]);
   if (!realOpen) return <></>;
 
   return (

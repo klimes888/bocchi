@@ -1,25 +1,29 @@
 "use client";
 import type React from "react";
 import styled, { ThemeProvider } from "styled-components";
+import { ReactLenis } from "lenis/react";
 
 import { theme } from "@/lib/styled-theme";
 
-import VoteSection from "@/components/VoteSection";
 import CharacterIntro from "@/components/CharacterIntro";
 import Guestbook from "@/components/Guestbook";
 import MainSection from "@/components/MainSection";
 import Footer from "@/components/Footer";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { UUID } from "@/lib/create-uuid";
 import {
   createUsers,
   fetchUserDocument,
+  FIREBASE_ERROR_CODE,
+  getUsers,
   getVoteCounts,
 } from "@/lib/firebase/users";
 import Loading from "@/components/ui/loading";
 import GlobalStyle from "./styled-global";
 import AudioSection from "@/components/AudioSection";
 import ImageSection from "@/components/ImageSection";
+import VoteSection from "@/components/VoteSection";
+import { AuthDialog } from "@/components/Popup";
 
 export default function BocchiLandingPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -28,6 +32,13 @@ export default function BocchiLandingPage() {
   const [voteCount, setvoteCount] = useState<Record<string, number> | null>(
     null
   );
+  const [createUser, setCreateUser] = useState(false);
+
+  const [dialog, setDialog] = useState(false);
+  const [authAlert, setAuthAlert] = useState(FIREBASE_ERROR_CODE.NONE);
+  const signupPopupHandle = () => {
+    setDialog(!dialog);
+  };
 
   useEffect(() => {
     /** 총 투표 수 들고오기 */
@@ -37,35 +48,57 @@ export default function BocchiLandingPage() {
     })();
   }, []);
 
+  async function resistUser({ id, pw }: { id: string; pw: string }) {
+    try {
+      const result = await createUsers(id, pw);
+      if (result) {
+        // setCreateUser(true);
+        // setTimeout(() => {
+        //   setDialog(false);
+        // }, 1000);
+      }
+      return result;
+    } catch (error) {
+      console.error("error: ", error);
+    }
+  }
+
+  async function loginUser({ id, pw }: { id: string; pw: string }) {
+    const { SUCCESS } = FIREBASE_ERROR_CODE;
+    try {
+      const result = await getUsers(id, pw);
+      if (result.code === SUCCESS) {
+        localStorage.setItem("user_uuid", result.data?.id);
+        setUserId(result.data?.id);
+        setDialog(false);
+        // fetchUserData(result.data?.id);
+      } else {
+        setAuthAlert(result.code);
+      }
+      return result;
+    } catch (error) {}
+  }
+
+  const fetchUserData = async (uuid: string | null) => {
+    if (uuid) {
+      try {
+        const { votes, user } = await fetchUserDocument(uuid);
+        if (votes.length >= 1) {
+          setWhoVoted(votes[0].vote || null);
+        }
+        setUserId(user?.id || null);
+      } catch (error) {}
+    } else {
+      // 유저가 없는 경우 유저 등록
+      // resistUser();
+    }
+  };
+
   useEffect(() => {
     const uuid = localStorage.getItem("user_uuid");
 
-    const resistUser = async () => {
-      const id = UUID();
-      const result = await createUsers(id);
-      if (result) {
-        localStorage.setItem("user_uuid", result);
-        setUserId(result);
-      }
-    };
-
     /** 파이어베이스 투표 데이터 들고 오기 */
-    (async () => {
-      if (uuid) {
-        try {
-          const { votes } = await fetchUserDocument(uuid);
-          const { uid, vote } = votes[0];
-
-          setWhoVoted(vote || null);
-          setUserId(uid || null);
-        } catch (error) {
-          resistUser();
-        }
-      } else {
-        // 유저가 없는 경우 유저 등록
-        resistUser();
-      }
-    })();
+    (async () => fetchUserData(uuid))();
 
     setTimeout(() => {
       setIsLoading(false);
@@ -81,20 +114,20 @@ export default function BocchiLandingPage() {
     <>
       <GlobalStyle />
       <ThemeProvider theme={theme}>
+        {/* <ReactLenis root /> */}
         <PageContainer>
           {/* Hero Section */}
-          <MainSection />
-
+          {/* <MainSection /> */}
           {/* Character Introduction */}
-          <CharacterIntro />
-
+          {/* <CharacterIntro /> */}
           {/* Character Popularity Vote Section */}
+          {/* <Dummy /> */}
           <VoteSection
             userId={userId}
             whoVoted={whoVoted}
             voteCount={voteCount}
+            isHasUserCheck={signupPopupHandle}
           />
-          {/* <Dummy /> */}
           <AudioSection frontSection={3} />
           {/* YouTube Music Video Carousel */}
           {/* <VideoSection /> */}
@@ -103,9 +136,15 @@ export default function BocchiLandingPage() {
           <ImageSection />
           {/* Guestbook Section */}
           <Guestbook />
-
           {/* Footer */}
           <Footer />
+          <AuthDialog
+            openChange={setDialog}
+            resistUser={resistUser}
+            open={dialog}
+            createUser={createUser}
+            loginUser={loginUser}
+          />
         </PageContainer>
       </ThemeProvider>
     </>
@@ -124,6 +163,4 @@ const PageContainer = styled.div`
 const Dummy = styled.div`
   width: 100%;
   height: 100vh;
-  background-color: #999;
-  border-bottom: 1px solid red;
 `;
