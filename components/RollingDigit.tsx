@@ -13,7 +13,14 @@ export const RollingDigit = ({ value, delay, rolling }: Props) => {
   const delayHandler = () => {
     const timer = setTimeout(() => {
       let startTime: number | null = null;
-      const duration = 1500; // 2초
+      let duration = 1000; // 1초
+      if (value <= 30) {
+        duration = 200;
+      } else if (value <= 100) {
+        duration = 400;
+      } else if (value <= 500) {
+        duration = 600;
+      }
       const startValue = 0;
 
       const updateCounter = (timestamp: number) => {

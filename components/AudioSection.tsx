@@ -82,7 +82,6 @@ export default function AudioSection({ frontSection }: Props) {
   // state
   const [isAllowedToPlay, setIsAllowedToPlay] = useState(false);
   const [scrollX, setScrollX] = useState(0);
-
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [loadPage, setLoadPage] = useState(false);
   const [itemSize, setItemSize] = useState(0);
@@ -179,6 +178,13 @@ export default function AudioSection({ frontSection }: Props) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const sectionStart = (frontSection - frontSection / 4) * window.innerWidth;
+  const relativeScroll = scrollX - sectionStart; // 현재 섹션 기준 위치
+
+  const progress =
+    Math.min(Math.max((relativeScroll * 2) / maxHeight, 0), 1) * 2; // 0 ~ 1 정규화
+  const colorValue = Math.floor(progress * 255);
+
   useEffect(() => {
     if (!innerRef.current) return;
     // 이전 섹션들 width 만큼 오른쪽으로 이동
@@ -238,7 +244,7 @@ export default function AudioSection({ frontSection }: Props) {
               $active={i === activeIndex && isAllowedToPlay}
               $margin={(containerCenter + itemSize) / 2}
             >
-              <ItemWrap>
+              <ItemWrap $colorValue={colorValue || 0}>
                 <ItemContent $active={i === activeIndex && isAllowedToPlay}>
                   <ItemContentInner
                     $active={i === activeIndex && isAllowedToPlay}
@@ -295,7 +301,8 @@ const Section = styled.section<{ $height: number }>`
   width: 100%;
   height: ${({ $height }) => $height}px;
   display: flex;
-  background: linear-gradient(180deg, #fdf2f8, #fefce8, #222);
+  background: linear-gradient(180deg, #fdf2f8, #fdf2f8, #fdf2f8, #222, #222);
+  padding-top: 5em;
   padding-bottom: 30em;
 `;
 
@@ -343,28 +350,33 @@ const rotate = keyframes`
    }
 `;
 
-const ItemWrap = styled.div`
+const ItemWrap = styled.div<{ $colorValue: number }>`
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+
+  p {
+    color: ${({ $colorValue }) =>
+      `rgba(${$colorValue}, ${$colorValue}, ${$colorValue}, 1)`};
+  }
 `;
 
-const ItemTitle = styled.h3`
+const ItemTitle = styled.p`
   font-size: 2.85rem;
   font-weight: 500;
   color: #222;
   margin-bottom: 2rem;
 `;
 
-const ItemDesc = styled.h4`
+const ItemDesc = styled.p`
   font-size: 1rem;
   font-weight: 300;
   color: #333;
   margin-bottom: 1rem;
 `;
 
-const ItemDate = styled.span`
+const ItemDate = styled.p`
   font-size: 0.9rem;
   font-weight: 400;
   color: #222;

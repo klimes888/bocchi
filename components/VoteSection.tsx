@@ -1,13 +1,7 @@
 "use client";
 
 import type React from "react";
-import {
-  createRef,
-  MutableRefObject,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { createRef, useEffect, useRef, useState } from "react";
 import styled, { css } from "styled-components";
 import { Heart } from "lucide-react";
 import Image from "next/image";
@@ -36,6 +30,7 @@ import StarLottie from "@/assets/icons/star.json";
 import HeartLottie from "@/assets/icons/heart.json";
 import FloatHeartLottie from "@/assets/icons/float_heart.json";
 import { RollingDigit } from "./RollingDigit";
+import { submitVote } from "@/lib/firebase/vote";
 
 // Character data with their signature colors
 const characters = [
@@ -100,6 +95,7 @@ interface Props {
   userId: string | null;
   whoVoted: string | null;
   voteCount: Record<string, number> | null;
+  isHasUserCheck: (top: number) => void;
 }
 
 const theme: Record<string, string> = {
@@ -110,7 +106,8 @@ const theme: Record<string, string> = {
 };
 
 export default function VoteSection(props: Props) {
-  const { userId, whoVoted, voteCount } = props;
+  useDragDetect({ threshold: 20, curPos: "section3", where: "section4" });
+  const { userId, whoVoted, voteCount, isHasUserCheck } = props;
   const [itemList, setItemList] = useState(characters);
   const [votedCharacter, setVotedCharacter] = useState<number | null>(null);
   const [mouseEnter, setMouseEnter] = useState<number | null>(null);
@@ -126,8 +123,6 @@ export default function VoteSection(props: Props) {
   const cardRef = useRef<(HTMLDivElement | null)[]>([]);
   const wordRef = useRef<(HTMLDivElement | null)[]>([]);
 
-  // useDragDetect({ threshold: 20, curPos: "section3", where: "section4" });
-
   const wordAniamtionHandle = (isFirst: boolean) => {
     wordRef.current.forEach((el) => {
       if (!el) return;
@@ -136,7 +131,6 @@ export default function VoteSection(props: Props) {
       } else {
         el.style.height = "0";
       }
-      // el.style.opacity = "1";
     });
   };
 
@@ -177,7 +171,7 @@ export default function VoteSection(props: Props) {
     }
   };
 
-  useIntersectionObserver(ref, 0.95, {
+  useIntersectionObserver(ref, 0.9, {
     isEnter: () => {
       setLoadPage(true);
       requestAnimationFrame(() => {
@@ -212,10 +206,16 @@ export default function VoteSection(props: Props) {
   }, [loadPage]);
 
   const handleVote = async (characterIndex: number, index: number) => {
-    if (votedCharacter !== null || !userId) return;
+    if (!ref.current) return;
+    if (!userId) {
+      const top = ref.current?.offsetTop;
+      isHasUserCheck(top);
+      return;
+    }
+    if (votedCharacter !== null) return;
 
     try {
-      // await submitVote({ uid: userId, vote: characterIndex.toString() });
+      await submitVote({ uid: userId, vote: characterIndex.toString() });
       // count up
       setItemList((prev) =>
         prev.map((data, i) => {
@@ -226,11 +226,12 @@ export default function VoteSection(props: Props) {
       );
 
       setVotedCharacter(characterIndex);
-      lottieRefs.current[index].current?.play();
       setTimeout(() => {
+        // lottieRefs.current[index].current?.play();
         heartRefs.current[index].current?.play();
       }, 1000);
     } catch (error) {
+      alert("투표에 문제가 생겼습니다. 다시 실행해주세요");
       console.error("error", error);
     }
   };
@@ -272,7 +273,6 @@ export default function VoteSection(props: Props) {
     );
   };
 
-  console.log("animationActive", animationActive);
   if (!loadPage) return <SectionLayout id="section3" ref={ref}></SectionLayout>;
   return (
     <SectionLayout id="section3" ref={ref}>

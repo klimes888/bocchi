@@ -11,13 +11,56 @@ import {
   getCountFromServer,
 } from "firebase/firestore";
 
-export async function createUsers(id: string) {
+export enum FIREBASE_ERROR_CODE {
+  NONE = "0",
+  SUCCESS = "1",
+  USER_ALREADY = "2",
+  USER_NOT_EXSIST = "3",
+  USER_INFO_INCORRECT = "4",
+}
+
+export async function createUsers(id: string, pw: string) {
   try {
-    await setDoc(doc(db, "users", id), {
+    const userGet = doc(db, "users", id);
+    const existingUser = await getDoc(userGet);
+
+    if (existingUser.exists()) {
+      return { code: FIREBASE_ERROR_CODE.USER_ALREADY, data: null }; //
+    }
+
+    const userRef = doc(db, "users", id);
+
+    await setDoc(userRef, {
       id,
       at: Timestamp.now(),
+      name: "",
+      img: "",
+      pw,
     });
-    return id;
+
+    return { code: FIREBASE_ERROR_CODE.SUCCESS, data: { id } };
+  } catch (error) {
+    console.error("Error users:", error);
+    throw error;
+  }
+}
+
+export async function getUsers(id: string, pw: string) {
+  try {
+    const userRef = doc(db, "users", id);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+      return { code: FIREBASE_ERROR_CODE.USER_NOT_EXSIST, data: null }; //
+    }
+
+    const userData = userSnap.data();
+
+    if (userData.pw !== pw) {
+      return { code: FIREBASE_ERROR_CODE.USER_INFO_INCORRECT, data: null }; //
+    }
+
+    return { code: FIREBASE_ERROR_CODE.SUCCESS, data: userData };
   } catch (error) {
     console.error("Error users:", error);
     throw error;

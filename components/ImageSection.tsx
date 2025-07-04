@@ -86,6 +86,7 @@ const Section = styled.div`
   justify-content: center;
   overflow: hidden;
   background-color: #000;
+  padding-bottom: 12em;
 `;
 
 const ItemSectionInner = styled.div`
