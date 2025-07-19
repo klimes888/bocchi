@@ -35,8 +35,10 @@ export default function BocchiLandingPage() {
   const [createUser, setCreateUser] = useState(false);
 
   const [dialog, setDialog] = useState(false);
+
   const [authAlert, setAuthAlert] = useState(FIREBASE_ERROR_CODE.NONE);
   const signupPopupHandle = () => {
+    if (!userId) return; // Did not Login
     setDialog(!dialog);
   };
 
@@ -51,7 +53,8 @@ export default function BocchiLandingPage() {
   async function resistUser({ id, pw }: { id: string; pw: string }) {
     try {
       const result = await createUsers(id, pw);
-      if (result) {
+      if (result.data?.id) {
+        setUserId(result.data.id);
         // setCreateUser(true);
         // setTimeout(() => {
         //   setDialog(false);

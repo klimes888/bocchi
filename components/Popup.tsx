@@ -22,6 +22,7 @@ interface Props {
 
 interface AuthProps {
   changeAuth: boolean;
+  realOpen: boolean;
   animate: boolean;
   setAnimate: Dispatch<SetStateAction<boolean>>;
   setChangeAuth: Dispatch<SetStateAction<boolean>>;
@@ -29,15 +30,18 @@ interface AuthProps {
   loginUser: ResistUser;
 }
 
+/**
+ * 회원가입 화면
+ */
 const AuthContent = ({
-  animate,
+  realOpen,
   changeAuth,
   setChangeAuth,
   setAnimate,
   resistUser,
   loginUser,
+  animate,
 }: AuthProps) => {
-  // const isSignUp = type === "signup";
   const [title, setTitle] = useState("라이브 하우스 입장하기");
   const [isAnimated, setIsAnimated] = useState(false);
   const [auth, setAuth] = useState({ id: "", pw: "" });
@@ -119,8 +123,8 @@ const AuthContent = ({
       setIsAnimated(changeAuth);
       setAlert(null);
       setAuth({ id: "", pw: "" });
-      if (!changeAuth) setAnimate(false);
-    }, 600);
+      // if (!changeAuth) setAnimate(false);
+    }, 800);
 
     if (changeAuth) setAnimate(true);
     return () => clearTimeout(timer);
@@ -159,7 +163,11 @@ const AuthContent = ({
   };
 
   return (
-    <ImageBlurWrap $changeAuth={changeAuth} $animate={animate}>
+    <ImageBlurWrap
+      $changeAuth={changeAuth}
+      $realOpen={realOpen}
+      $animate={animate}
+    >
       <ImageBlur />
       <ModalInner $changeAuth={isAnimated}>
         <ContentBody>
@@ -228,6 +236,9 @@ const AuthContent = ({
   );
 };
 
+/**
+ * 팝업 Main 화면 (Login)
+ */
 export const AuthDialog = ({
   openChange,
   resistUser,
@@ -237,8 +248,9 @@ export const AuthDialog = ({
 }: Props) => {
   const [changeAuth, setChangeAuth] = useState(false); // 회원가입 여부
   const [animate, setAnimate] = useState(false);
-  const [realOpen, setRealOpen] = useState(open);
+  const [realOpen, setRealOpen] = useState(false);
 
+  // 팝업 자연스럽게 띄우는 애니메이션
   useEffect(() => {
     if (!open) return;
     const scrollbarWidth =
@@ -252,36 +264,37 @@ export const AuthDialog = ({
     };
   }, [top, open]);
 
+  // 원본 이미지 화면 애니메이션
   const bannerRender = () => {
     return (
-      <ModalBannerWrap $changeAuth={changeAuth} $animate={animate}>
+      <ModalBannerWrap
+        $changeAuth={changeAuth}
+        $realOpen={realOpen}
+        $animate={animate}
+      >
         <ModalBanner src={Starry.src} />
       </ModalBannerWrap>
     );
   };
 
+  // 팝업 컨트롤 할 때, open boolean
   useEffect(() => {
     if (open) {
       setRealOpen(true);
     } else {
       setTimeout(() => {
+        setChangeAuth(false);
         setRealOpen(false);
-      }, 600);
+      }, 800);
     }
   }, [open]);
 
-  // useEffect(() => {
-  //   if (createUser) {
-  //     setChangeAuth(false);
-  //   }
-  // }, [createUser]);
   if (!realOpen) return <></>;
 
   return (
     <Layout
       onClick={(e) => {
         openChange(false);
-        setChangeAuth(false);
       }}
       top={window.scrollY}
     >
@@ -290,10 +303,11 @@ export const AuthDialog = ({
         <AuthContent
           changeAuth={changeAuth}
           setChangeAuth={setChangeAuth}
-          animate={animate}
+          realOpen={realOpen}
           setAnimate={setAnimate}
           resistUser={resistUser}
           loginUser={loginUser}
+          animate={animate}
         />
       </Modal>
     </Layout>
@@ -332,14 +346,8 @@ const clipAnimation = keyframes`
   0% {
     clip-path: inset(0 1px 60% 0);
   }
-  30% {
-    clip-path: inset(0 1px 0 0);
-  }
-  50% {
-    clip-path: inset(0 1px 0 0);
-  }
   70% {
-    clip-path: inset(70% 1px 0 0);
+    clip-path: inset(0 1px 0 0);
   }
   100% {
     clip-path: inset(70% 1px 0 0);
@@ -349,12 +357,6 @@ const clipAnimation = keyframes`
 const clipAnimationReverse = keyframes`
   0% {
     clip-path: inset(70% 1px 0 0);
-  }
-  30% {
-    clip-path: inset(70% 1px 0 0);
-  }
-  50% {
-    clip-path: inset(0 1px 0 0);
   }
   70% {
     clip-path: inset(0 1px 0 0);
@@ -432,7 +434,11 @@ const Modal = styled.div<{ $open: boolean }>`
   padding: 4px;
 `;
 
-const ModalBannerWrap = styled.div<{ $changeAuth: boolean; $animate: boolean }>`
+const ModalBannerWrap = styled.div<{
+  $changeAuth: boolean;
+  $realOpen: boolean;
+  $animate: boolean;
+}>`
   position: absolute;
   top: 0.2em;
   left: 0.2em;
@@ -444,11 +450,12 @@ const ModalBannerWrap = styled.div<{ $changeAuth: boolean; $animate: boolean }>`
   border-radius: 1.2rem;
   clip-path: inset(0 1px 60% 0);
   z-index: 15;
-  ${({ $changeAuth, $animate }) =>
+  ${({ $changeAuth, $realOpen, $animate }) =>
+    $realOpen &&
     $animate &&
     css`
-      animation: ${$changeAuth ? clipAnimation : clipAnimationReverse} 1.5s ease
-        forwards;
+      animation: ${$changeAuth ? clipAnimation : clipAnimationReverse} 1s
+        ease-in-out forwards;
     `}
 `;
 
@@ -458,7 +465,11 @@ const ModalBanner = styled.img`
   /* clip-path: inset(0 0 70% 0); */
 `;
 
-const ImageBlurWrap = styled.div<{ $changeAuth: boolean; $animate: boolean }>`
+const ImageBlurWrap = styled.div<{
+  $changeAuth: boolean;
+  $realOpen: boolean;
+  $animate: boolean;
+}>`
   position: absolute;
   top: 0.2em;
   left: 0.2em;
@@ -468,7 +479,8 @@ const ImageBlurWrap = styled.div<{ $changeAuth: boolean; $animate: boolean }>`
   overflow: hidden;
   display: flex;
   z-index: 13;
-  ${({ $changeAuth, $animate }) =>
+  ${({ $changeAuth, $realOpen, $animate }) =>
+    $realOpen &&
     $animate &&
     css`
       animation: ${$changeAuth ? backAnimation : backAnimationReverse} 1.5s ease

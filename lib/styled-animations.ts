@@ -1,9 +1,18 @@
 import { keyframes } from "styled-components";
 
 export const animations = {
-  pulse: keyframes`
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+  pulse: (
+    color: Record<string, string>,
+    opacity: { a: string; b: string } = { a: "", b: "" }
+  ) => keyframes`
+    0% {
+      box-shadow: 0 0 0 0 ${color.a + opacity.a};
+
+      
+    }
+    100% {
+      box-shadow: 0 0 0 1em ${color.b + opacity.b};
+    }
   `,
 
   bounce: keyframes`

@@ -25,8 +25,8 @@ export const InfinityShape = ({ theme }: { theme: string }) => {
 
   switch (breakPoint) {
     case "desktop":
-      NUM_ROWS = 80;
-      NUM_COLS = 120;
+      NUM_ROWS = 60;
+      NUM_COLS = 80;
       break;
 
     case "mobile":
