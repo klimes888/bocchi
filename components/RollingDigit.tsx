@@ -13,13 +13,13 @@ export const RollingDigit = ({ value, delay, rolling }: Props) => {
   const delayHandler = () => {
     const timer = setTimeout(() => {
       let startTime: number | null = null;
-      let duration = 1000; // 1초
-      if (value <= 30) {
-        duration = 200;
-      } else if (value <= 100) {
-        duration = 400;
-      } else if (value <= 500) {
-        duration = 600;
+      let duration = 2000; // 1초
+      if (value <= 1030) {
+        duration = 700;
+      } else if (value <= 1200) {
+        duration = 1200;
+      } else if (value <= 1500) {
+        duration = 1500;
       }
       const startValue = 0;
 
@@ -51,7 +51,7 @@ export const RollingDigit = ({ value, delay, rolling }: Props) => {
   return (
     <DigitWrapper>
       <DigitList>
-        <Digit>{count}</Digit>
+        <Digit>{count.toLocaleString()}</Digit>
       </DigitList>
     </DigitWrapper>
   );
@@ -68,6 +68,6 @@ const DigitList = styled.div`
 
 const Digit = styled.div`
   text-align: center;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   font-weight: bold;
 `;

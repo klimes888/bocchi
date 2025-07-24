@@ -15,6 +15,12 @@ import Ryo from "@/assets/votes/trans_yamada.png";
 import Hitori from "@/assets/votes/trans_hitori.png";
 import Kita from "@/assets/votes/trans_kita.png";
 
+// assets - voted
+import VotedBocchi from "@/assets/votes/voted_bocchi.png";
+import VotedYamada from "@/assets/votes/voted_yamada.png";
+import VotedNijika from "@/assets/votes/voted_nijika.png";
+import VotedKita from "@/assets/votes/voted_kita2.png";
+
 import { useIntersectionObserver } from "./useIntersection";
 
 import { useDragDetect } from "@/hooks/use-drag";
@@ -27,58 +33,70 @@ const characters = [
   {
     id: 1,
     name: "Hitori\nGotoh",
-    nickname: "Bocchi",
+    nickname: "HITORI",
+    family: "GOTOH",
     voiceActor: "Yoshino Aoyama",
     trait: "Extremely introverted but passionate guitarist",
-    linear: { deg: "135deg", a: "#f68ac2", b: "rgb(253, 2, 254)" },
+    linear: { deg: "135deg", a: "#f68ac2", b: "#fd02fe" },
     // color: "linear-gradient(135deg, #f68ac2, #FD02FE)",
     gif: HitoriGif,
     img: Hitori,
+    voted: VotedBocchi,
     fColor: "rgba(255, 128, 193, 0.9)",
     kanji: "ご と う ひ と り",
     role: "Main Guitarist",
     votes: 0,
+    open: false,
   },
   {
     id: 2,
     name: "Nijika\nIjichi",
-    nickname: "Nijika",
+    nickname: "NIJIKA",
+    family: "IJICHI",
     voiceActor: "Sayumi Suzushiro",
     trait: "Cheerful drummer who brings everyone together",
     linear: { deg: "135deg", a: "#facc15", b: "#fb923c" },
     gif: NijikaGif,
     img: Nijika,
+    voted: VotedNijika,
     fColor: "rgba(250, 210, 49, 0.9)",
     kanji: "い じ ち に じ か",
     role: "Drummer",
     votes: 0,
+    open: false,
   },
   {
     id: 3,
     name: "Ryo\nYamada",
-    nickname: "Ryo",
+    nickname: "RYO",
+    family: "YAMADA",
     voiceActor: "Saku Mizuno",
     trait: "Cool bassist with a mysterious aura",
     linear: { deg: "135deg", a: "#4e84f7", b: "#4f46e5" },
     gif: RyoGif,
     img: Ryo,
+    voted: VotedYamada,
     fColor: "rgba(99, 147, 250, 0.9)",
     kanji: "や ま だ リ ョ ウ",
     role: "Bassist & Sub Vocalist",
     votes: 0,
+    open: false,
   },
   {
     id: 4,
     name: "Ikuyo\nKita",
-    nickname: "Kita",
+    nickname: "IKUYO",
+    family: "KITA",
     trait: "Energetic vocalist full of dreams",
     linear: { deg: "135deg", a: "#f56969", b: "#fb923c" },
     gif: KitaGif,
     img: Kita,
+    voted: VotedKita,
     fColor: "rgba(234, 82, 82, 0.9)",
     kanji: "き た い く よ",
     role: "Guitarist & Vocalist",
     votes: 0,
+    open: false,
   },
 ];
 
@@ -87,26 +105,29 @@ interface Props {
   whoVoted: string | null;
   voteCount: Record<string, number> | null;
   isHasUserCheck: (top: number) => void;
+  isNowLogin: boolean;
 }
 
 const theme: Record<string, string> = {
-  Kita: "#f56969",
-  Ryo: "#4e84f7",
-  Nijika: "#facc15",
-  Bocchi: "#f68ac2",
+  KITA: "#f56969",
+  RYO: "#4e84f7",
+  NIJIKA: "#facc15",
+  HITORI: "#f68ac2",
 };
 
 export default function VoteSection(props: Props) {
   useDragDetect({ threshold: 20, curPos: "section3", where: "section4" });
-  const { userId, whoVoted, voteCount, isHasUserCheck } = props;
+  const { userId, whoVoted, voteCount, isHasUserCheck, isNowLogin } = props;
   const [itemList, setItemList] = useState(characters);
   const [votedCharacter, setVotedCharacter] = useState<number | null>(null);
   const [gridHoverType, setGridHoverType] = useState(characters[0].nickname);
   const [loadPage, setLoadPage] = useState(false);
   const [animationActive, setAnimationActive] = useState(false);
+  const [isAlreadyVote, setIsAlreadyVote] = useState(true);
+
+  // const [isAllOpen, setIsAllOpen] = useState(false);
 
   const heartRefs = useRef<Array<any | null>>(itemList.map(() => createRef()));
-
   const ref = useRef<HTMLDivElement | null>(null);
   const titleWrapref = useRef<HTMLDivElement | null>(null);
   const wordRef = useRef<(HTMLDivElement | null)[]>([]);
@@ -166,6 +187,8 @@ export default function VoteSection(props: Props) {
   });
 
   const handleVote = async (characterIndex: number, index: number) => {
+    // setVotedCharacter(characterIndex);
+    // return;
     if (!ref.current) return;
     if (!userId) {
       const top = ref.current?.offsetTop;
@@ -211,6 +234,7 @@ export default function VoteSection(props: Props) {
 
   useEffect(() => {
     if (!whoVoted) return;
+    setIsAlreadyVote(true);
     setVotedCharacter(whoVoted ? Number(whoVoted) : null);
   }, [whoVoted]);
 
@@ -218,12 +242,12 @@ export default function VoteSection(props: Props) {
     if (!voteCount) return;
     const result = characters.map((data, i) => ({
       ...data,
-      votes: voteCount[i + 1],
+      votes: voteCount[i + 1] + 1000, // dummy 1000
     }));
     setItemList(result);
   }, [voteCount]);
 
-  const words = ["투", "표", "하", "기"];
+  const words = ["V", "O", "T", "E"];
 
   if (!loadPage) return <SectionLayout id="section3" ref={ref}></SectionLayout>;
   return (
@@ -256,6 +280,9 @@ export default function VoteSection(props: Props) {
                 animationActive={animationActive}
                 order={i}
                 loadPage={loadPage}
+                setItemList={setItemList}
+                isAlreadyVote={isAlreadyVote}
+                isNowLogin={isNowLogin}
               />
             </Fragment>
           ))}
@@ -334,9 +361,9 @@ const SectionLayout = styled(Section)`
 const VoteGrid = styled.div`
   display: grid;
   grid-template-columns: 2fr;
-  gap: 2.5rem;
+  gap: 2rem;
   width: 100%;
-  max-width: 80rem;
+  max-width: 85rem;
   margin-top: 5em;
   @media (min-width: ${(props) => props.theme.breakpoints.md}) {
     grid-template-columns: repeat(2, 1fr);

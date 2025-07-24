@@ -12,7 +12,7 @@ const nextConfig = {
   compiler: {
     styledComponents: true, // styled-components SSR 지원 활성화
   },
-  output: "export",
+  // output: "export",
 };
 
 export default nextConfig;

@@ -35,10 +35,11 @@ export default function BocchiLandingPage() {
   const [createUser, setCreateUser] = useState(false);
 
   const [dialog, setDialog] = useState(false);
+  const [isNowLogin, setIsNowLogin] = useState(false); // 로그인 되어있는 상태인지 or 회원가입 후 로그인 했는지 여부
 
   const [authAlert, setAuthAlert] = useState(FIREBASE_ERROR_CODE.NONE);
   const signupPopupHandle = () => {
-    if (!userId) return; // Did not Login
+    if (userId) return; // if has user info then logined
     setDialog(!dialog);
   };
 
@@ -74,7 +75,8 @@ export default function BocchiLandingPage() {
         localStorage.setItem("user_uuid", result.data?.id);
         setUserId(result.data?.id);
         setDialog(false);
-        // fetchUserData(result.data?.id);
+        fetchUserData(result.data?.id);
+        setIsNowLogin(true);
       } else {
         setAuthAlert(result.code);
       }
@@ -130,6 +132,7 @@ export default function BocchiLandingPage() {
             whoVoted={whoVoted}
             voteCount={voteCount}
             isHasUserCheck={signupPopupHandle}
+            isNowLogin={isNowLogin}
           />
           <AudioSection frontSection={3} />
           {/* YouTube Music Video Carousel */}
