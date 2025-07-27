@@ -126,8 +126,6 @@ export default function VoteSection(props: Props) {
   const [isAlreadyVote, setIsAlreadyVote] = useState(true);
 
   // const [isAllOpen, setIsAllOpen] = useState(false);
-
-  const heartRefs = useRef<Array<any | null>>(itemList.map(() => createRef()));
   const ref = useRef<HTMLDivElement | null>(null);
   const titleWrapref = useRef<HTMLDivElement | null>(null);
   const wordRef = useRef<(HTMLDivElement | null)[]>([]);
@@ -209,10 +207,6 @@ export default function VoteSection(props: Props) {
       );
       // who selected
       setVotedCharacter(characterIndex);
-      setTimeout(() => {
-        // lottieRefs.current[index].current?.play();
-        heartRefs.current[index].current?.play();
-      }, 1000);
     } catch (error) {
       alert("투표에 문제가 생겼습니다. 다시 실행해주세요");
       console.error("error", error);
@@ -278,7 +272,7 @@ export default function VoteSection(props: Props) {
                 votedCharacter={votedCharacter}
                 handleVote={handleVote}
                 animationActive={animationActive}
-                order={i}
+                order={i + 1}
                 loadPage={loadPage}
                 setItemList={setItemList}
                 isAlreadyVote={isAlreadyVote}

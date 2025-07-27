@@ -6,6 +6,13 @@ const GlobalStyle = createGlobalStyle`
   body {
     font-family: 'Orbitron', sans-serif;
     font-size: 1rem;
+    
+  }
+
+  input {
+    &:focus {
+      outline: none;
+    }
   }
 `;
 

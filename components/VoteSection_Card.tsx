@@ -57,6 +57,7 @@ export default function VoteSectionCard(props: Props) {
     isAlreadyVote,
     isNowLogin,
   } = props;
+
   const charaRef = useRef<HTMLDivElement | null>(null);
   const glareRef = useRef<HTMLDivElement | null>(null);
   const bodyRef = useRef<HTMLDivElement | null>(null);
@@ -89,7 +90,6 @@ export default function VoteSectionCard(props: Props) {
       setTimeout(() => {
         if (!titleWrapRef.current) return;
         titleWrapRef.current.style.height = "12rem";
-        titleWrapRef.current.style.opacity = "1";
       }, 500);
 
       shadowWrapRef.current.style.height = "12rem";
@@ -307,18 +307,18 @@ export default function VoteSectionCard(props: Props) {
       order={order}
       onClick={() => {
         if (votedCharacter) return;
-        handleVote(character.id, order);
+        handleVote(character.id, order - 1);
       }}
     >
       <VoteCard ref={charaRef} order={order} $isBack={character.open}>
         <VoteCardFront ref={frontRef}>
           <Glare ref={glareRef} color={character.linear} />
-          <TitleWrap ref={titleWrapRef} order={order}>
+          <TitleWrap ref={titleWrapRef} order={order} $loadPage={loadPage}>
             <SubTitle>{character.role}</SubTitle>
             <AvatarTitle>{character.name}</AvatarTitle>
             <KanjiName>{character.kanji}</KanjiName>
           </TitleWrap>
-          <TextShadow ref={shadowWrapRef} order={order}>
+          <TextShadow ref={shadowWrapRef} order={order} $loadPage={loadPage}>
             <SubTitle>{character.role}</SubTitle>
             <AvatarTitle>{character.name}</AvatarTitle>
             <KanjiName>{character.kanji}</KanjiName>
@@ -401,7 +401,7 @@ const VoteCardWrap = styled.div<{
   height: 27em;
   transform-style: preserve-3d;
   perspective: 50em;
-  z-index: ${({ order }) => 4 - order};
+  z-index: ${({ order }) => 5 - order};
   user-select: none;
 `;
 
@@ -415,8 +415,8 @@ const VoteCard = styled.div<{
   justify-content: center;
   width: 100%;
   height: 0;
-  transition: height 0.5s ${({ order }) => `0.${order + 6}s`} ease,
-    box-shadow 0.5s ${({ order }) => `0.${order + 6}s`} ease;
+  transition: height 0.5s ${({ order }) => `0.${order + 5}s`} ease,
+    box-shadow 0.5s ${({ order }) => `0.${order + 5}s`} ease;
   border-radius: 1em;
   z-index: 1;
   transform-style: preserve-3d;
@@ -534,33 +534,34 @@ const VoteAvatarWrap = styled.div`
   transform-style: preserve-3d;
 `;
 
-const TitleWrap = styled.div<{ order?: number }>`
+const TitleWrap = styled.div<{ order?: number; $loadPage: boolean }>`
   position: absolute;
   top: 3em;
   left: 2em;
   z-index: 9;
   transform: translate3d(0, 0, 2.5em);
-  opacity: 0;
+  opacity: ${({ $loadPage }) => ($loadPage ? 1 : 0)};
   height: 0;
   overflow: hidden;
   ${({ order }) =>
     order &&
     css`
-      transition: height 0.5s ${`0.${order + 6}s`} ease,
-        opacity 0.5s ${`${order * 10}ms`} ease;
+      transition: height 0.5s ${`0.${order + 5}s`} ease,
+        opacity 0.5s ${`0.${order + 5}s`} ease;
     `}
 `;
 
-const TextShadow = styled.div<{ order: number }>`
+const TextShadow = styled.div<{ order: number; $loadPage: boolean }>`
   position: absolute;
   transform: translate3d(0, 0, 1em);
   top: 3em;
   left: 2em;
   opacity: 0.8;
+  opacity: ${({ $loadPage }) => ($loadPage ? 1 : 0)};
   filter: blur(0.1em) brightness(0.2);
   height: 0;
   overflow: hidden;
-  transition: height 0.5s ${({ order }) => `0.${order + 6}s`} ease;
+  transition: height 0.5s ${({ order }) => `0.${order + 5}s`} ease;
 `;
 
 const SubTitle = styled.p`

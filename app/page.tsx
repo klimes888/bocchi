@@ -23,7 +23,15 @@ import GlobalStyle from "./styled-global";
 import AudioSection from "@/components/AudioSection";
 import ImageSection from "@/components/ImageSection";
 import VoteSection from "@/components/VoteSection";
-import { AuthDialog } from "@/components/Popup";
+import { AuthDialog } from "@/components/Auth.Popup";
+import { EmojiDialog } from "@/components/Emoji.Popup";
+import { StaticImageData } from "next/image";
+
+export enum LoginEnum {
+  NONE, // not logined
+  FIRST, // logined but make profile not yet,
+  ALREADY,
+}
 
 export default function BocchiLandingPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -38,6 +46,15 @@ export default function BocchiLandingPage() {
   const [isNowLogin, setIsNowLogin] = useState(false); // 로그인 되어있는 상태인지 or 회원가입 후 로그인 했는지 여부
 
   const [authAlert, setAuthAlert] = useState(FIREBASE_ERROR_CODE.NONE);
+
+  const [loginType, setLoginType] = useState(LoginEnum.FIRST);
+
+  const [emojiPopup, setEmojiPopup] = useState(false);
+  const [selectEmoji, setSelectEmoji] = useState<{
+    key: number;
+    img: StaticImageData;
+  } | null>(null);
+
   const signupPopupHandle = () => {
     if (userId) return; // if has user info then logined
     setDialog(!dialog);
@@ -127,21 +144,26 @@ export default function BocchiLandingPage() {
           {/* <CharacterIntro /> */}
           {/* Character Popularity Vote Section */}
           {/* <Dummy /> */}
-          <VoteSection
+          {/* <VoteSection
             userId={userId}
             whoVoted={whoVoted}
             voteCount={voteCount}
             isHasUserCheck={signupPopupHandle}
             isNowLogin={isNowLogin}
-          />
-          <AudioSection frontSection={3} />
+          /> */}
+          {/* <AudioSection frontSection={3} /> */}
           {/* YouTube Music Video Carousel */}
           {/* <VideoSection /> */}
           {/* <Dummy /> */}
           {/* Image List */}
-          <ImageSection />
+          {/* <ImageSection /> */}
           {/* Guestbook Section */}
-          <Guestbook />
+          <Guestbook
+            userId={userId}
+            loginType={loginType}
+            setEmojiPopup={setEmojiPopup}
+            selectEmoji={selectEmoji}
+          />
           {/* Footer */}
           <Footer />
           <AuthDialog
@@ -150,6 +172,12 @@ export default function BocchiLandingPage() {
             open={dialog}
             createUser={createUser}
             loginUser={loginUser}
+          />
+          <EmojiDialog
+            open={emojiPopup}
+            openChange={(props) => setEmojiPopup(props)}
+            setSelectEmoji={(props) => setSelectEmoji(props)}
+            selectEmoji={selectEmoji}
           />
         </PageContainer>
       </ThemeProvider>
