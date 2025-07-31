@@ -1,6 +1,6 @@
 import styled, { css, keyframes } from "styled-components";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
-import { FIREBASE_ERROR_CODE } from "@/lib/firebase/users";
+import { USER_ERROR_CODE } from "@/lib/firebase/users";
 import { emoji } from "@/data/emoji.img";
 import { StaticImageData } from "next/image";
 
@@ -39,7 +39,6 @@ export const EmojiDialog = ({
       window.innerWidth - document.documentElement.clientWidth;
     document.body.style.overflow = "hidden";
     document.body.style.paddingRight = `${scrollbarWidth}px`; // dummy layout
-
     return () => {
       document.body.style.overflow = "";
       document.body.style.paddingRight = "";

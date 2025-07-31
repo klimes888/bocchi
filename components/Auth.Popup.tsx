@@ -5,12 +5,12 @@ import Starry from "@/assets/starry.jpg";
 // import Ticket from "@/assets/ticket.webp";
 import Ticket from "@/assets/icons/ticket.json";
 import Lottie from "lottie-react";
-import { FIREBASE_ERROR_CODE } from "@/lib/firebase/users";
+import { USER_ERROR_CODE } from "@/lib/firebase/users";
 
 type ResistUser = (flag: {
   id: string;
   pw: string;
-}) => Promise<{ code: FIREBASE_ERROR_CODE; data: any | null } | undefined>;
+}) => Promise<{ code: USER_ERROR_CODE; data: any | null } | undefined>;
 
 interface Props {
   openChange: Dispatch<SetStateAction<boolean>>;
@@ -74,7 +74,7 @@ const AuthContent = ({
   };
 
   const submitHandle = async () => {
-    const { SUCCESS, USER_ALREADY } = FIREBASE_ERROR_CODE;
+    const { SUCCESS, USER_ALREADY } = USER_ERROR_CODE;
     // validate
     const valid = validateHandle();
     if (!valid) return;
@@ -90,8 +90,7 @@ const AuthContent = ({
   };
 
   const submitLoginHandle = async () => {
-    const { SUCCESS, USER_NOT_EXSIST, USER_INFO_INCORRECT } =
-      FIREBASE_ERROR_CODE;
+    const { SUCCESS, USER_NOT_EXSIST, USER_INFO_INCORRECT } = USER_ERROR_CODE;
     const valid = validateHandle();
     if (!valid) return;
     const result = await loginUser(auth);

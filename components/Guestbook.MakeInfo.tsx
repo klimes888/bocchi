@@ -17,7 +17,7 @@ type Props = {
   setNewComment: (props: CommentType) => void;
   selectEmoji: { key: number; img: StaticImageData } | null;
   newComment: CommentType;
-  sendData: () => void;
+  sendData: () => Promise<void>;
 };
 
 export default function GuestbookMakeInfo(props: Props) {
@@ -25,9 +25,14 @@ export default function GuestbookMakeInfo(props: Props) {
     props;
   const [alert, setAlert] = useState({ target: 0, msg: "" });
 
-  const vlidateSendData = () => {
+  const vlidateSendData = async () => {
     if (!newComment?.username || newComment?.username?.length <= 1) {
       setAlert({ target: 1, msg: "별명은 2글자 이상 입력해주세요." });
+      return;
+    }
+
+    if (!newComment?.username || newComment?.username?.length >= 20) {
+      setAlert({ target: 1, msg: "별명은 20자 까지만 입력해주세요." });
       return;
     }
 
@@ -38,9 +43,17 @@ export default function GuestbookMakeInfo(props: Props) {
       });
       return;
     }
+
+    if (newComment?.message?.length >= 300) {
+      setAlert({
+        target: 2,
+        msg: "300자를 초과할 수 없습니다.",
+      });
+      return;
+    }
+
     setAlert({ target: 0, msg: "" });
-    console.log("success send");
-    sendData();
+    await sendData();
   };
 
   const placeHolderHandler = (taget: number, msg: string) => {

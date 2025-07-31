@@ -8,10 +8,11 @@ import { LoginEnum } from "@/app/page";
 import Comments from "./Guestbook.Comment";
 import { EmojiDialog } from "./Emoji.Popup";
 import { StaticImageData } from "next/image";
+import { guestBook } from "@/lib/firebase/guestBook";
 
 interface Props {
-  userId: string | null;
   loginType: LoginEnum;
+  userId: string | null;
   setEmojiPopup: Dispatch<SetStateAction<boolean>>;
   selectEmoji: { key: number; img: StaticImageData } | null;
 }
@@ -44,7 +45,7 @@ const commentsData = [
 ];
 
 export default function Guestbook(props: Props) {
-  const { setEmojiPopup, selectEmoji } = props;
+  const { setEmojiPopup, selectEmoji, userId } = props;
 
   const [comments, setComments] = useState(commentsData);
   const [newComment, setNewComment] = useState<CommentType>({
@@ -52,14 +53,21 @@ export default function Guestbook(props: Props) {
     message: "",
     key: null,
   });
-  const handleCommentSubmit = () => {
-    if (!newComment.username.trim() || !newComment.message.trim()) return;
 
+  const handleCommentSubmit = async () => {
+    if (!newComment.username.trim()) return;
+    if (!userId) return;
     const comment = {
       username: newComment.username,
       message: selectEmoji?.key ? "" : newComment.message,
       key: selectEmoji?.key || null,
+      uid: userId,
     };
+    try {
+      await guestBook(comment);
+    } catch (error) {
+      console.error("Error: ", error);
+    }
   };
 
   useEffect(() => {
@@ -75,8 +83,8 @@ export default function Guestbook(props: Props) {
         <SectionTitle>Fan Guestbook</SectionTitle>
         {/* Comments List */}
         <div className="comments-container">
-          {comments.map((comment) => (
-            <Fragment key={comment.id}>
+          {comments.map((comment, idx) => (
+            <Fragment key={comment.id} ref={}>
               <Comments username={""} date={""} message={""} />
             </Fragment>
           ))}

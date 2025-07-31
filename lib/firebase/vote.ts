@@ -11,13 +11,20 @@ import {
   doc,
 } from "firebase/firestore";
 
+export enum VOTE_ERROR_CODE {
+  NONE,
+  SUCCESS,
+  VOTE_ALREADY,
+  SOMETHING_WRONG,
+}
+
 export async function submitVote({ uid, vote }: { uid: string; vote: string }) {
   // 1. 중복 투표 방지
   const voteQuery = query(collection(db, "votes"), where("uid", "==", uid));
   const existingVotes = await getDocs(voteQuery);
 
   if (!existingVotes.empty) {
-    throw new Error("Already voted");
+    return { code: VOTE_ERROR_CODE.VOTE_ALREADY, data: null };
   }
 
   // 2. 투표 저장
@@ -27,7 +34,7 @@ export async function submitVote({ uid, vote }: { uid: string; vote: string }) {
     at: Timestamp.now(),
   });
 
-  return true;
+  return { code: VOTE_ERROR_CODE.SUCCESS, data: true };
 }
 
 export async function getVotedInfo({ uid }: { uid: string }) {
@@ -38,13 +45,8 @@ export async function getVotedInfo({ uid }: { uid: string }) {
     const snapshot = await getDocs(votesQuery);
     if (snapshot.empty) return false;
     snapshot.forEach((doc) => console.log(doc.data()));
+    return { code: VOTE_ERROR_CODE.SUCCESS, data: null };
   } catch (error) {
-    console.error("error", error);
+    return { code: VOTE_ERROR_CODE.SOMETHING_WRONG, data: null };
   }
-
-  // 특정 캐릭터에게 투표한 사람 목록
-  //   const votesForChar = query(
-  //     collection(db, "votes"),
-  //     where("votedFor", "==", "character1")
-  //   );
 }

@@ -14,7 +14,7 @@ import { UUID } from "@/lib/create-uuid";
 import {
   createUsers,
   fetchUserDocument,
-  FIREBASE_ERROR_CODE,
+  USER_ERROR_CODE,
   getUsers,
   getVoteCounts,
 } from "@/lib/firebase/users";
@@ -45,7 +45,7 @@ export default function BocchiLandingPage() {
   const [dialog, setDialog] = useState(false);
   const [isNowLogin, setIsNowLogin] = useState(false); // 로그인 되어있는 상태인지 or 회원가입 후 로그인 했는지 여부
 
-  const [authAlert, setAuthAlert] = useState(FIREBASE_ERROR_CODE.NONE);
+  const [authAlert, setAuthAlert] = useState(USER_ERROR_CODE.NONE);
 
   const [loginType, setLoginType] = useState(LoginEnum.FIRST);
 
@@ -85,7 +85,7 @@ export default function BocchiLandingPage() {
   }
 
   async function loginUser({ id, pw }: { id: string; pw: string }) {
-    const { SUCCESS } = FIREBASE_ERROR_CODE;
+    const { SUCCESS } = USER_ERROR_CODE;
     try {
       const result = await getUsers(id, pw);
       if (result.code === SUCCESS) {
@@ -144,13 +144,13 @@ export default function BocchiLandingPage() {
           {/* <CharacterIntro /> */}
           {/* Character Popularity Vote Section */}
           {/* <Dummy /> */}
-          {/* <VoteSection
+          <VoteSection
             userId={userId}
             whoVoted={whoVoted}
             voteCount={voteCount}
             isHasUserCheck={signupPopupHandle}
             isNowLogin={isNowLogin}
-          /> */}
+          />
           {/* <AudioSection frontSection={3} /> */}
           {/* YouTube Music Video Carousel */}
           {/* <VideoSection /> */}
