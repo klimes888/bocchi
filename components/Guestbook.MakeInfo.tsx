@@ -12,17 +12,35 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { StaticImageData } from "next/image";
 import { CommentType } from "./Guestbook";
 
+import { defaultComment } from "@/components/Guestbook";
+
 type Props = {
   setEmojiPopup: (props: boolean) => void;
-  setNewComment: (props: CommentType) => void;
+  setNewComment: (props: typeof defaultComment) => void;
   selectEmoji: { key: number; img: StaticImageData } | null;
-  newComment: CommentType;
+  newComment: typeof defaultComment;
   sendData: () => Promise<void>;
+  setSelectEmoji: Dispatch<
+    SetStateAction<{
+      key: number;
+      img: StaticImageData;
+    } | null>
+  >;
+  isHasUserCheck: () => void;
+  userId: string | null;
 };
 
 export default function GuestbookMakeInfo(props: Props) {
-  const { newComment, setNewComment, sendData, setEmojiPopup, selectEmoji } =
-    props;
+  const {
+    newComment,
+    setNewComment,
+    setSelectEmoji,
+    sendData,
+    setEmojiPopup,
+    selectEmoji,
+    userId,
+    isHasUserCheck,
+  } = props;
   const [alert, setAlert] = useState({ target: 0, msg: "" });
 
   const vlidateSendData = async () => {
@@ -52,8 +70,14 @@ export default function GuestbookMakeInfo(props: Props) {
       return;
     }
 
-    setAlert({ target: 0, msg: "" });
-    await sendData();
+    try {
+      await sendData();
+    } catch (error) {
+    } finally {
+      setAlert({ target: 0, msg: "" });
+      setNewComment({ key: null, message: "", username: "" });
+      setSelectEmoji(null);
+    }
   };
 
   const placeHolderHandler = (taget: number, msg: string) => {
@@ -61,6 +85,14 @@ export default function GuestbookMakeInfo(props: Props) {
       return alert.msg;
     }
     return selectEmoji ? "" : msg;
+  };
+
+  const validateChangeEv = (type: string, value: string) => {
+    if (!userId) {
+      isHasUserCheck();
+      return;
+    }
+    setNewComment({ ...newComment, [type]: value });
   };
 
   useEffect(() => {
@@ -79,7 +111,7 @@ export default function GuestbookMakeInfo(props: Props) {
               $isAlert={alert.target === 1 && !!alert.msg}
               value={newComment.username}
               onChange={({ target }) =>
-                setNewComment({ ...newComment, username: target.value })
+                validateChangeEv("username", target.value)
               }
             />
           </InputWrap>
@@ -90,12 +122,12 @@ export default function GuestbookMakeInfo(props: Props) {
               placeholder={placeHolderHandler(2, "코멘트 남기기 🎸")}
               value={newComment.message}
               onChange={({ target }) =>
-                setNewComment({ ...newComment, message: target.value })
+                validateChangeEv("message", target.value)
               }
             />
             {selectEmoji ? (
               <ImageWrap>
-                <Image src={selectEmoji.img.src} alt="" />
+                <Image src={selectEmoji?.img?.src} alt="" />
               </ImageWrap>
             ) : null}
           </InputWrap>

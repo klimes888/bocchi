@@ -13,6 +13,7 @@ import {
   startAfter,
   QueryDocumentSnapshot,
   DocumentData,
+  deleteDoc,
 } from "firebase/firestore";
 
 export async function guestBook({
@@ -42,10 +43,12 @@ export async function guestBook({
 
 let lastVisible: QueryDocumentSnapshot<DocumentData> | null = null;
 
-export async function getGuestBookList(take: number = 10) {
+export async function getGuestBookList(
+  take: number = 10,
+  userId: string | null
+) {
   try {
     const start = startAfter(lastVisible);
-    console.log("start -->", start);
     const baseQuery = query(
       collection(db, "guestbook"),
       orderBy("at", "desc"), // 최신순
@@ -54,14 +57,30 @@ export async function getGuestBookList(take: number = 10) {
     );
 
     const snap = await getDocs(baseQuery);
-    const data = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const data = snap.docs.map((doc) => {
+      const content = doc.data();
+      return {
+        ...content,
+        id: doc.id,
+        isMe: content.uid === userId,
+      };
+    });
 
     // 다음 페이지를 위한 기준점 저장
     lastVisible = snap.docs[snap.docs.length - 1] ?? null;
 
-    return { data, lastVisible };
+    return { data, islast: !!!lastVisible };
   } catch (error) {
     console.error("Error getting guestbook list:", error);
     throw error;
+  }
+}
+
+export async function removeGuestBook(id: string) {
+  try {
+    const docRef = doc(db, "guestbook", id);
+    await deleteDoc(docRef);
+  } catch (error) {
+    console.error("Error: ", error);
   }
 }

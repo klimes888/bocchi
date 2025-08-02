@@ -143,14 +143,13 @@ export default function BocchiLandingPage() {
           {/* Character Introduction */}
           {/* <CharacterIntro /> */}
           {/* Character Popularity Vote Section */}
-          {/* <Dummy /> */}
-          <VoteSection
+          {/* <VoteSection
             userId={userId}
             whoVoted={whoVoted}
             voteCount={voteCount}
             isHasUserCheck={signupPopupHandle}
             isNowLogin={isNowLogin}
-          />
+          /> */}
           {/* <AudioSection frontSection={3} /> */}
           {/* YouTube Music Video Carousel */}
           {/* <VideoSection /> */}
@@ -163,6 +162,8 @@ export default function BocchiLandingPage() {
             loginType={loginType}
             setEmojiPopup={setEmojiPopup}
             selectEmoji={selectEmoji}
+            setSelectEmoji={setSelectEmoji}
+            isHasUserCheck={signupPopupHandle}
           />
           {/* Footer */}
           <Footer />
