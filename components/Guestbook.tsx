@@ -1,19 +1,11 @@
 "use client";
 
 import type React from "react";
-import {
-  Dispatch,
-  Fragment,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import styled, { css } from "styled-components";
 import GuestbookMakeInfo from "./Guestbook.MakeInfo";
 import { LoginEnum } from "@/app/page";
 import Comments from "./Guestbook.Comment";
-import { EmojiDialog } from "./Emoji.Popup";
 import { StaticImageData } from "next/image";
 import {
   getGuestBookList,
@@ -22,6 +14,10 @@ import {
 } from "@/lib/firebase/guestBook";
 import UseInfinityObserver from "@/hooks/use-infinityObserver";
 import { UUID } from "@/lib/create-uuid";
+
+import CONG_LOTT from "@/assets/icons/confetti.json";
+import Lottie from "lottie-react";
+import lottieCtrl from "lottie-web";
 
 interface Props {
   loginType: LoginEnum;
@@ -60,10 +56,14 @@ export default function Guestbook(props: Props) {
   const { setSelectEmoji, setEmojiPopup, selectEmoji, userId, isHasUserCheck } =
     props;
   const topRef = useRef<HTMLDivElement | null>(null);
+  const lottieRef = useRef<any | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const { ref, data, isLast } = UseInfinityObserver(() =>
     getGuestBookList(10, userId)
   );
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [lottieView, setLottieView] = useState(false);
 
   const [commentRemove, setCommentRemove] = useState<{
     id: string | null;
@@ -77,6 +77,63 @@ export default function Guestbook(props: Props) {
 
   const [comments, setComments] = useState(data);
   const [newComment, setNewComment] = useState(defaultComment);
+
+  useEffect(() => {
+    const thresholdIndex = 4;
+    const updateScales = () => {
+      const visibleItems: { index: number; top: number }[] = [];
+
+      itemRefs.current.forEach((el, index) => {
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+
+        // 화면에 보이는 영역만 계산
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          visibleItems.push({ index, top: rect.top });
+        }
+      });
+
+      // 화면 상단 기준으로 정렬
+      // visibleItems.sort((a, b) => a.top - b.top);
+
+      itemRefs.current.forEach((el, index) => {
+        if (!el) return;
+
+        const targetIndex = visibleItems.findIndex((v) => v.index === index);
+        const baseScale = 0.5;
+        if (targetIndex >= 0 && targetIndex < thresholdIndex) {
+          el.style.transform = `scale(1)`;
+          el.style.marginBottom = `-0.5rem`;
+        } else if (targetIndex >= thresholdIndex) {
+          const step = 0.1;
+          const scale = Math.max(
+            1 - (targetIndex - thresholdIndex + 1) * step,
+            baseScale
+          );
+          el.style.transform = `scale(${scale.toFixed(2)})`;
+        } else {
+          el.style.transform = `scale(${baseScale})`; // 화면 밖이거나 못 잡은 아이템
+          el.style.marginBottom = "0";
+        }
+      });
+    };
+
+    let ticking = false;
+
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateScales();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    updateScales(); // 초기 실행
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const handleCommentSubmit = async () => {
     if (!newComment.username.trim()) return;
@@ -104,6 +161,13 @@ export default function Guestbook(props: Props) {
         },
         ...prev,
       ]);
+      scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      setTimeout(() => {
+        setLottieView(true);
+        setTimeout(() => {
+          setLottieView(false);
+        }, 3500);
+      }, 500);
     } catch (error) {
       console.error("Error: ", error);
     }
@@ -132,7 +196,6 @@ export default function Guestbook(props: Props) {
   }, [commentRemove.id]);
 
   useEffect(() => {
-    console.log("data??", data);
     if (data.length !== 0) {
       setComments((prev) => [...prev, ...data]);
     }
@@ -151,22 +214,55 @@ export default function Guestbook(props: Props) {
     }
   }, [selectEmoji]);
 
+  useEffect(() => {
+    if (lottieView && lottieRef?.current) {
+      lottieRef.current.play();
+    } else {
+      lottieRef.current?.stop();
+    }
+  }, [lottieView]);
+
+  const congratuationLottieRender = () => {
+    return (
+      <LottieWrap $visible={lottieView}>
+        <Lottie
+          lottieRef={lottieRef}
+          animationData={CONG_LOTT}
+          loop={false}
+          autoplay={false}
+        />
+      </LottieWrap>
+    );
+  };
+
   return (
     <GuestbookSection ref={topRef}>
       <Container>
         <SectionTitle>Fan Guestbook</SectionTitle>
         {/* Comments List */}
-        <div className="comments-container">
-          {comments.map(({ key, ...data }, idx) => (
-            <CommentsWrap
-              key={data.id + idx}
-              ref={!isLast ? ref : null}
-              $isRemove={commentRemove.id === data.id}
-            >
-              <Comments emoji={key} {...data} removeContent={removeContent} />
-            </CommentsWrap>
-          ))}
-        </div>
+        <CommentContainer ref={scrollRef}>
+          {comments.map(({ key, ...data }, idx) => {
+            return (
+              <CommentsWrap
+                key={data.id + idx}
+                ref={!isLast ? ref : null}
+                $isRemove={commentRemove.id === data.id}
+              >
+                <CommentsInner
+                  ref={(el) => {
+                    itemRefs.current[idx] = el;
+                  }}
+                >
+                  <Comments
+                    emoji={key}
+                    {...data}
+                    removeContent={removeContent}
+                  />
+                </CommentsInner>
+              </CommentsWrap>
+            );
+          })}
+        </CommentContainer>
 
         {/* Comment Form */}
         <FormContainer>
@@ -182,6 +278,7 @@ export default function Guestbook(props: Props) {
             }
             userId={userId}
           />
+          {congratuationLottieRender()}
         </FormContainer>
       </Container>
     </GuestbookSection>
@@ -230,21 +327,43 @@ const GuestbookSection = styled(Section)`
   display: flex;
   background: #f5f5f5;
   width: 100%;
-  .comments-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
+`;
+
+const CommentContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: scroll;
 `;
 
 const CommentsWrap = styled.div<{ $isRemove: boolean }>`
-  display: flex;
   width: 100%;
-  overflow: hidden;
+
   max-height: ${({ $isRemove }) => ($isRemove ? "0" : "15rem")};
+  opacity: ${({ $isRemove }) => ($isRemove ? "0" : "1")};
+
   ${({ $isRemove }) =>
     $isRemove &&
     css`
-      transition: max-height 0.5s ease;
+      transition: max-height 0.5s ease, margin 0.5s ease, opacity 0.5s ease;
     `}
+`;
+const CommentsInner = styled.div`
+  transition: transform 0.3s ease;
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+`;
+
+const LottieWrap = styled.div<{ $visible: boolean }>`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: ${({ $visible }) => ($visible ? 99 : -99)};
+  opacity: ${({ $visible }) => ($visible ? 1 : 0.1)};
 `;

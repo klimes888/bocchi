@@ -25,7 +25,7 @@ export default function MainSection() {
   return (
     <HeroSection id="section1">
       <HeroImage src={Back} alt="Kessoku Band" fill sizes="100vw" />
-      <TitleLoggWrap onMouseDown={(e) => console.log("React mousedown", e)}>
+      <TitleLoggWrap>
         <TitleLogo src={LogoText} alt="" />
       </TitleLoggWrap>
       <HeroBackground />

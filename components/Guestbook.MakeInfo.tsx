@@ -157,12 +157,6 @@ const CommentForm = styled(Card)`
   width: 100%;
   background: ${(props) => props.theme.colors.white};
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
 `;
 
 const FormInner = styled.div`
@@ -243,6 +237,7 @@ const inputStyle = css`
   border-radius: 0.5rem;
   width: 100%;
   box-sizing: border-box;
+  z-index: 0;
   &:focus {
     outline: none;
     border: 0.1rem solid rgba(131, 110, 110, 0.1);

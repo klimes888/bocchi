@@ -13,7 +13,7 @@ const UseInfinityObserver = (fetch: () => Promise<any>) => {
     observer.current = new IntersectionObserver(async (entries) => {
       if (entries[0].isIntersecting) {
         const fetchData = await fetch();
-        console.log("isLast", fetchData.islast);
+
         if (!fetchData.islast) {
           setData(fetchData.data);
         }

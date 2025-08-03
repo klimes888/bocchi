@@ -300,7 +300,7 @@ export default VideoSection;
 //       }
 //     });
 //   }, [currentIndex]);
-//   console.log("visibleItems", ...visibleItems);
+
 //   return (
 //     <CarouselWrap>
 //       <CarouselWrapInner ref={containerRef}>

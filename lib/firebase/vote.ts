@@ -44,7 +44,7 @@ export async function getVotedInfo({ uid }: { uid: string }) {
     const votesQuery = query(collection(db, "votes"), where("uid", "==", uid));
     const snapshot = await getDocs(votesQuery);
     if (snapshot.empty) return false;
-    snapshot.forEach((doc) => console.log(doc.data()));
+
     return { code: VOTE_ERROR_CODE.SUCCESS, data: null };
   } catch (error) {
     return { code: VOTE_ERROR_CODE.SOMETHING_WRONG, data: null };

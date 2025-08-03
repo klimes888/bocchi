@@ -72,7 +72,6 @@ const CommentCard = styled(Card)`
   border-left: 4px solid ${(props) => props.theme.colors.primary.pink};
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease;
-
   &:hover {
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   }
@@ -157,12 +156,18 @@ const RemoveButton = styled.button`
     20% {
       transform: scale(0.8);
     }
+    25% {
+      transform: scale(0.75);
+    }
     30% {
-      transform: scale(0.9);
+      transform: scale(0.8);
     }
-    35% {
+    40% {
+      transform: scale(1.4);
+    }
+    /* 35% {
       transform: scale(1.3);
-    }
+    } */
     95% {
       transform: scale(1.4);
     }
@@ -173,7 +178,10 @@ const RemoveButton = styled.button`
 
   transition: transform 0.5s cubic-bezier(0.22, 1.61, 0.36, 1);
   &:hover {
-    animation: pulseDrop 1.2s ease-out infinite;
+    animation: pulseDrop 1.2s ease-out;
+  }
+  &:active {
+    animation: pulseDrop 1.2s ease-out;
   }
 `;
 
