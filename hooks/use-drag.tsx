@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useLayoutEffect, useRef } from "react";
+import { useBreakpoint } from "./use-breakpoint";
 
 export function useDragDetect({
   threshold,
@@ -15,6 +16,8 @@ export function useDragDetect({
   const wheelTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollLockTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const breakPoint = useBreakpoint();
+
   const lockScroll = () => {
     document.body.style.overflow = "hidden";
   };
@@ -25,7 +28,7 @@ export function useDragDetect({
 
   useLayoutEffect(() => {
     const section = document.getElementById(curPos);
-    if (!section) return;
+    if (!section || breakPoint === "mobile") return;
 
     const goToNextSection = () => {
       lockScroll();

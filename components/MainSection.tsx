@@ -1,5 +1,4 @@
 "use client";
-import { useEffect } from "react";
 import styled from "styled-components";
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
@@ -92,7 +91,6 @@ const HeroContent = styled.div`
     background-clip: text;
     -webkit-background-clip: text;
     color: transparent;
-    /* animation: ${animations.pulse} 2s infinite; */
     margin-bottom: 1rem;
 
     @media (min-width: ${(props) => props.theme.breakpoints.md}) {

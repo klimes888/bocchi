@@ -44,6 +44,7 @@ export default function GuestbookMakeInfo(props: Props) {
   const [alert, setAlert] = useState({ target: 0, msg: "" });
 
   const vlidateSendData = async () => {
+    if (!userId) return;
     if (!newComment?.username || newComment?.username?.length <= 1) {
       setAlert({ target: 1, msg: "별명은 2글자 이상 입력해주세요." });
       return;
@@ -133,10 +134,13 @@ export default function GuestbookMakeInfo(props: Props) {
           </InputWrap>
         </FormInner>
         <SendButtonWrap>
-          <EmojiButton onClick={() => setEmojiPopup(true)}>
+          <EmojiButton
+            $isLogin={!!userId}
+            onClick={() => userId && setEmojiPopup(true)}
+          >
             이모티콘
           </EmojiButton>
-          <SendButton onClick={vlidateSendData}>
+          <SendButton $isLogin={!!userId} onClick={vlidateSendData}>
             <Users
               style={{
                 width: "1rem",
@@ -180,7 +184,7 @@ const SendButtonWrap = styled.div`
   height: 2.5rem;
 `;
 
-const SendButton = styled.button`
+const SendButton = styled.button<{ $isLogin: boolean }>`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -189,27 +193,32 @@ const SendButton = styled.button`
   height: 100%;
   background: ${(props) => props.theme.colors.gradients.text};
   color: ${(props) => props.theme.colors.white};
+  opacity: ${({ $isLogin }) => ($isLogin ? 1 : 0.6)};
   font-size: 0.9rem;
   font-weight: 600;
   border-radius: 0.25rem;
   &:hover {
-    opacity: 0.9;
+    opacity: ${({ $isLogin }) => ($isLogin ? 0.9 : 0.5)};
   }
 `;
 
-const EmojiButton = styled.button`
+const EmojiButton = styled.button<{ $isLogin: boolean }>`
   display: flex;
   justify-content: center;
   align-items: center;
   background: #444;
   border-radius: 0.25rem;
   color: ${(props) => props.theme.colors.white};
+  opacity: ${({ $isLogin }) => ($isLogin ? 1 : 0.6)};
   font-size: 0.85rem;
   font-weight: 600;
   border-radius: 0.25rem;
   padding: 0 1rem;
   white-space: nowrap;
   height: 100%;
+  &:hover {
+    opacity: ${({ $isLogin }) => ($isLogin ? 0.9 : 0.5)};
+  }
 `;
 
 const ImageWrap = styled.div`

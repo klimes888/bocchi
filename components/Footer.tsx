@@ -49,7 +49,6 @@ const SectionLayout = styled.footer`
     svg {
       width: 2rem;
       height: 2rem;
-      /* animation: ${animations.pulse} 2s infinite; */
 
       &:nth-child(2) {
         animation-delay: 0.1s;

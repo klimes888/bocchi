@@ -45,7 +45,7 @@ const characters = [
     fColor: "rgba(255, 128, 193, 0.9)",
     kanji: "ご と う ひ と り",
     role: "Main Guitarist",
-    votes: 0,
+    votes: 921,
     open: false,
   },
   {
@@ -62,7 +62,7 @@ const characters = [
     fColor: "rgba(250, 210, 49, 0.9)",
     kanji: "い じ ち に じ か",
     role: "Drummer",
-    votes: 0,
+    votes: 1112,
     open: false,
   },
   {
@@ -79,7 +79,7 @@ const characters = [
     fColor: "rgba(99, 147, 250, 0.9)",
     kanji: "や ま だ リ ョ ウ",
     role: "Bassist & Sub Vocalist",
-    votes: 0,
+    votes: 902,
     open: false,
   },
   {
@@ -95,7 +95,7 @@ const characters = [
     fColor: "rgba(234, 82, 82, 0.9)",
     kanji: "き た い く よ",
     role: "Guitarist & Vocalist",
-    votes: 0,
+    votes: 823,
     open: false,
   },
 ];
@@ -236,7 +236,7 @@ export default function VoteSection(props: Props) {
     if (!voteCount) return;
     const result = characters.map((data, i) => ({
       ...data,
-      votes: voteCount[i + 1] + 1000, // dummy 1000
+      votes: voteCount[i + 1] + data.votes, // dummy
     }));
     setItemList(result);
   }, [voteCount]);

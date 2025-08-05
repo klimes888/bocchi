@@ -26,6 +26,7 @@ import VoteSection from "@/components/VoteSection";
 import { AuthDialog } from "@/components/Auth.Popup";
 import { EmojiDialog } from "@/components/Emoji.Popup";
 import { StaticImageData } from "next/image";
+import { useBreakpoint } from "@/hooks/use-breakpoint";
 
 export enum LoginEnum {
   NONE, // not logined
@@ -40,6 +41,7 @@ export default function BocchiLandingPage() {
   const [voteCount, setvoteCount] = useState<Record<string, number> | null>(
     null
   );
+  const [isPreventForMobile, setIsPreventForMobile] = useState(false);
   const [createUser, setCreateUser] = useState(false);
 
   const [dialog, setDialog] = useState(false);
@@ -49,11 +51,15 @@ export default function BocchiLandingPage() {
 
   const [loginType, setLoginType] = useState(LoginEnum.FIRST);
 
+  const breakPoint = useBreakpoint();
+
   const [emojiPopup, setEmojiPopup] = useState(false);
   const [selectEmoji, setSelectEmoji] = useState<{
     key: number;
     img: StaticImageData;
   } | null>(null);
+
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const signupPopupHandle = () => {
     if (userId) return; // if has user info then logined
@@ -67,6 +73,23 @@ export default function BocchiLandingPage() {
       setvoteCount(count);
     })();
   }, []);
+
+  useEffect(() => {
+    const isMobile = breakPoint === "mobile";
+    setIsPreventForMobile(isMobile);
+
+    if (isMobile) {
+      const scrollbarWidth =
+        window.innerWidth - document.documentElement.clientWidth;
+      document.body.style.overflow = "hidden";
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+    };
+  }, [breakPoint, isLoading]);
 
   async function resistUser({ id, pw }: { id: string; pw: string }) {
     try {
@@ -130,6 +153,8 @@ export default function BocchiLandingPage() {
     nextSection?.scrollIntoView();
   }, []);
 
+  const TITLE = "모바일은 작업중이에요⚠️";
+  const DESC = "일단 PC 먼저 확인해주세요.";
   if (isLoading) return <Loading />;
 
   return (
@@ -137,25 +162,35 @@ export default function BocchiLandingPage() {
       <GlobalStyle />
       <ThemeProvider theme={theme}>
         {/* <ReactLenis root /> */}
-        <PageContainer>
+        <PageContainer ref={containerRef}>
+          {isPreventForMobile && (
+            <Prevent>
+              <Popup>
+                <PopupInner>
+                  <Title>{TITLE}</Title>
+                  <Desc>{DESC}</Desc>
+                </PopupInner>
+              </Popup>
+            </Prevent>
+          )}
           {/* Hero Section */}
-          {/* <MainSection /> */}
+          <MainSection />
           {/* Character Introduction */}
-          {/* <CharacterIntro /> */}
+          <CharacterIntro />
           {/* Character Popularity Vote Section */}
-          {/* <VoteSection
+          <VoteSection
             userId={userId}
             whoVoted={whoVoted}
             voteCount={voteCount}
             isHasUserCheck={signupPopupHandle}
             isNowLogin={isNowLogin}
-          /> */}
-          {/* <AudioSection frontSection={3} /> */}
+          />
+          <AudioSection frontSection={3} />
           {/* YouTube Music Video Carousel */}
           {/* <VideoSection /> */}
           {/* <Dummy /> */}
           {/* Image List */}
-          {/* <ImageSection /> */}
+          <ImageSection />
           {/* Guestbook Section */}
           <Guestbook
             userId={userId}
@@ -190,12 +225,44 @@ export default function BocchiLandingPage() {
 const PageContainer = styled.div`
   position: relative;
   width: 100%;
-  min-height: 100vh;
   background: ${(props) => props.theme.colors.gradients.background};
   transform-style: preserve-3d;
 `;
 
-const Dummy = styled.div`
+const Prevent = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 100vh;
+  height: 100%;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const Popup = styled.div`
+  width: 12rem;
+  background-color: #fff;
+  box-shadow: 0 0 0.85rem 0 rgba(0, 0, 0, 0.5);
+  border-radius: 0.25rem;
+  overflow: hidden;
+`;
+
+const PopupInner = styled.div`
+  padding: 1rem;
+`;
+
+const Title = styled.p`
+  font-size: 1rem;
+  color: #222;
+  font-weight: 700;
+  margin-bottom: 0.65rem;
+`;
+
+const Desc = styled.p`
+  font-size: 0.9rem;
+  color: #444;
+  font-weight: 400;
 `;

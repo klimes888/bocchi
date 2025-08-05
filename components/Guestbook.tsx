@@ -338,7 +338,6 @@ const CommentContainer = styled.div`
 
 const CommentsWrap = styled.div<{ $isRemove: boolean }>`
   width: 100%;
-
   max-height: ${({ $isRemove }) => ($isRemove ? "0" : "15rem")};
   opacity: ${({ $isRemove }) => ($isRemove ? "0" : "1")};
 
