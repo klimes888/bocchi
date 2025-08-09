@@ -14,6 +14,7 @@ import Lottie from "lottie-react";
 import { RollingDigit } from "./RollingDigit";
 import HeartLottie from "@/assets/icons/heart.json";
 import FloatHeartLottie from "@/assets/icons/float_heart.json";
+import { useBreakpoint } from "@/hooks/use-breakpoint";
 
 interface CharacterType {
   id: number;
@@ -73,6 +74,8 @@ export default function VoteSectionCard(props: Props) {
   const [rollingAnime, setRollingAnime] = useState(false);
   const [preventMouse, setPreventMouse] = useState(true);
 
+  const breakPoint = useBreakpoint();
+
   const cardWrapHandler = () => {
     const card = charaRef.current;
     let timer;
@@ -84,15 +87,17 @@ export default function VoteSectionCard(props: Props) {
     )
       return;
     if (loadPage) {
-      card.style.height = "27.5rem";
+      const size = breakPoint === "mobile" ? "20rem" : "27rem";
+      card.style.height = size;
       card.style.boxShadow = "0 1em 1em 0.25em rgba(0, 0, 0, 0.3)";
 
+      const txtSize = breakPoint === "mobile" ? "8rem" : "12rem";
       setTimeout(() => {
         if (!titleWrapRef.current) return;
-        titleWrapRef.current.style.height = "12rem";
+        titleWrapRef.current.style.height = txtSize;
       }, 500);
 
-      shadowWrapRef.current.style.height = "12rem";
+      shadowWrapRef.current.style.height = txtSize;
       buttonRef.current.style.height = "3rem";
     } else {
       card.style.height = "0";
@@ -141,7 +146,8 @@ export default function VoteSectionCard(props: Props) {
           if (bodyRef?.current) {
             bodyRef.current.style.zIndex = "999";
           }
-          card.style.transform = "scale(1.15) rotateY(1980deg)";
+          const sacle = breakPoint === "mobile" ? "1.05" : "1.15";
+          card.style.transform = `scale(${sacle}) rotateY(1980deg)`;
           if (heartRefs?.current || floatHeartRefs?.current) {
             heartRefs.current.play();
             floatHeartRefs.current.play();
@@ -159,7 +165,8 @@ export default function VoteSectionCard(props: Props) {
       // Trigger when click card for card rotate
       card.style.transition = "transform 1000ms cubic-bezier(0.1, 0.9, 0.2, 1)";
       card.style.transform = `rotateX(0deg) rotateY(1980deg)`;
-      card.style.height = "24.5rem";
+      const size = breakPoint === "mobile" ? "19rem" : "24.5rem";
+      card.style.height = size;
 
       // card transition이 끝난 후 실행하는 리스너
       card.addEventListener("transitionend", animationHandle);
@@ -403,11 +410,14 @@ const VoteCardWrap = styled.div<{
   perspective: 50em;
   z-index: ${({ order }) => 5 - order};
   user-select: none;
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    height: 20em;
+    perspective: 40em;
+  }
 `;
 
 const VoteCard = styled.div<{
   order: number;
-
   $isBack: boolean;
 }>`
   position: relative;
@@ -435,6 +445,9 @@ const CardFace = styled.div`
 const VoteCardFront = styled(CardFace)`
   transform-style: preserve-3d;
   perspective: 50em;
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    perspective: 40em;
+  }
 `;
 
 const VoteCardBack = styled(CardFace)<{
@@ -460,6 +473,9 @@ const CardContent = styled.div`
   width: 100%;
   height: 100%;
   padding: 0.65rem;
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    padding: 0.25rem;
+  }
 `;
 
 const CharacterDummy = styled.div<{ color?: string }>`
@@ -474,6 +490,9 @@ const CharacterDummy = styled.div<{ color?: string }>`
   opacity: 0.5;
   background-color: ${({ color }) => color};
   z-index: 9;
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    height: 12rem;
+  }
 `;
 
 const CharacterWrap = styled(CharacterDummy)<{ type?: string }>`
@@ -486,19 +505,39 @@ const CharacterWrap = styled(CharacterDummy)<{ type?: string }>`
 
   ${({ type }) => {
     switch (type) {
-      case "GOTOH":
-        return `width: 60%;`;
+      case "HITORI":
+        return `width: 65%; transform: translate(-50%, 1%); height: 18rem;`;
       case "RYO":
-        return `width: 80%;`;
-      case "IJICHI":
-        return `width: 77%; transform: translate(-50%, -5%); height: 18.5rem;`;
+        return `width: 80%; transform: translate(-50%, 1%); height: 18rem;`;
+      case "NIJIKA":
+        return `width: 77%; transform: translate(-50%, 0%); height: 18rem;`;
       case "IKUYO":
-        return `width: 86%; transform: translate(-48%, -2%); height: 18rem;`;
+        return `width: 90.5%; transform: translate(-50%, 2%); height: 18rem;`;
 
       default:
         return "width: 70%;";
     }
   }}
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    height: 13rem;
+
+    ${({ type }) => {
+      switch (type) {
+        case "HITORI":
+          return `width: 65%; transform: translate(-50%, 0%); height: 14rem;`;
+        case "RYO":
+          return `width: 80%; transform: translate(-50%, 1%);`;
+        case "NIJIKA":
+          return `width: 77%; transform: translate(-50%, -1%); height: 13.5rem;`;
+        case "IKUYO":
+          return `width: 90%; transform: translate(-50%, 1%); height: 13.5rem;`;
+
+        default:
+          return "width: 70%;";
+      }
+    }}
+  }
 `;
 
 const CharacterImg = styled(Image)`
@@ -522,18 +561,6 @@ const Glare = styled.div<{ color: Record<string, string> }>`
   will-change: background;
 `;
 
-const VoteAvatarWrap = styled.div`
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: end;
-  justify-content: center;
-  width: 100%;
-  padding: 0 1em;
-  z-index: 1;
-  transform-style: preserve-3d;
-`;
-
 const TitleWrap = styled.div<{ order?: number; $loadPage: boolean }>`
   position: absolute;
   top: 3em;
@@ -553,7 +580,7 @@ const TitleWrap = styled.div<{ order?: number; $loadPage: boolean }>`
 
 const TextShadow = styled.div<{ order: number; $loadPage: boolean }>`
   position: absolute;
-  transform: translate3d(0, 0, 1em);
+  transform: translate3d(0, 0, 1.2em);
   top: 3em;
   left: 2em;
   opacity: 0.8;
@@ -562,6 +589,10 @@ const TextShadow = styled.div<{ order: number; $loadPage: boolean }>`
   height: 0;
   overflow: hidden;
   transition: height 0.5s ${({ order }) => `0.${order + 5}s`} ease;
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    transform: translate3d(0, 0, 1em);
+    font-size: 0.85rem;
+  }
 `;
 
 const SubTitle = styled.p`
@@ -569,6 +600,9 @@ const SubTitle = styled.p`
   font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
   font-style: italic;
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    font-size: 0.85rem;
+  }
 `;
 
 const AvatarTitle = styled.p<{ $invertColor?: string }>`
@@ -580,6 +614,11 @@ const AvatarTitle = styled.p<{ $invertColor?: string }>`
   color: ${({ $invertColor }) =>
     $invertColor ? $invertColor : "rgba(255, 255, 255, 1)"};
   white-space: pre-line;
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 2rem;
+  }
 `;
 
 const KanjiName = styled.p`
@@ -587,6 +626,10 @@ const KanjiName = styled.p`
   font-weight: 500;
   color: rgba(255, 255, 255, 0.8);
   margin-bottom: 0.5rem;
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
 `;
 
 const MusicToolWrap = styled.div<{ $isNijka: boolean }>`
@@ -596,13 +639,22 @@ const MusicToolWrap = styled.div<{ $isNijka: boolean }>`
   transform: translate3d(-50%, -50%, 5em);
   width: ${({ $isNijka }) => ($isNijka ? 14 : 18)}rem;
   height: 100%;
-  z-index: 12;
+  z-index: 9999;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    top: ${({ $isNijka }) => ($isNijka ? 60 : 55)}%;
+    left: ${({ $isNijka }) => ($isNijka ? 50 : 50)}%;
+    width: ${({ $isNijka }) => ($isNijka ? 9 : 10)}rem;
+  }
 `;
 
 const MusicToolWrap2 = styled(MusicToolWrap)`
   top: ${({ $isNijka }) => ($isNijka ? 60 : 57)}%;
   left: ${({ $isNijka }) => ($isNijka ? 46 : 51)}%;
   transform: translate3d(-50%, -50%, 3em);
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    transform: translate3d(-50%, -50%, 2em);
+  }
 `;
 
 const ImageItem = styled(Image)`
@@ -627,22 +679,6 @@ const ShadowImage = styled(Image)`
   filter: blur(0.1em) brightness(0.3);
 `;
 
-const VoteAvatar = styled.div<{ $color: string }>`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 9rem;
-  height: 9rem;
-  border-radius: 0.65rem;
-  background: ${(props) => props.$color};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  transform-style: preserve-3d;
-  transform: translate3d(0, 0, 10em);
-`;
-
 const VoteInfo = styled.div`
   position: relative;
   display: flex;
@@ -664,6 +700,9 @@ const VoteInfoTopTitle = styled.div`
   width: 100%;
   margin-left: 0.4rem;
   margin-top: -0.3rem;
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    margin-top: 0.5rem;
+  }
 `;
 
 const InfoTitle = styled.p`
@@ -671,12 +710,19 @@ const InfoTitle = styled.p`
   font-size: 1.5rem;
   font-weight: bold;
   color: #222;
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    font-size: 1.2rem;
+  }
 `;
 
 const SubInfoTitle = styled.p`
   font-size: 0.9rem;
   line-height: 1rem;
   color: #888;
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    font-size: 0.8rem;
+    line-height: 0.9rem;
+  }
 `;
 
 const VoteInfoBottom = styled(VoteInfoTop)`
@@ -689,6 +735,10 @@ const VoteInfoBottom = styled(VoteInfoTop)`
     font-size: 1.5rem;
     font-weight: bold;
     color: ${(props) => props.theme.colors.gray[800]};
+  }
+
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    align-items: center;
   }
 `;
 
@@ -707,6 +757,10 @@ const HeartWrap = styled.div`
   justify-content: center;
   width: 3rem;
   height: 3rem;
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    width: 2rem;
+    height: 2rem;
+  }
 `;
 
 const SvgHeartWrap = styled.div`
@@ -718,6 +772,13 @@ const SvgHeartWrap = styled.div`
     width: 2rem;
     height: 2rem;
     color: rgba(243, 115, 115, 0.8);
+    @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+  }
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    transform: translate(-50%, -60%);
   }
 `;
 
@@ -765,26 +826,6 @@ const VoteButton = styled.div<{
   }
 `;
 
-const ImageWrap = styled(Image)<{ $isVisible: boolean }>`
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: opacity 0.5s ease;
-  opacity: ${({ $isVisible }) => ($isVisible ? 1 : 0)};
-  padding: 0.5rem;
-  border-radius: 1rem;
-`;
-
-const LottieWrap = styled.div<{ $visible: boolean }>`
-  display: ${({ $visible }) => ($visible ? "inline" : "none")};
-  width: 3rem;
-  z-index: 2;
-  margin-left: -1em;
-  margin-right: -0.4em;
-  margin-bottom: 0.25em;
-`;
-
 const HeartLottieWrap = styled.div`
   position: absolute;
   top: 50%;
@@ -792,6 +833,9 @@ const HeartLottieWrap = styled.div`
   transform: translate3d(-50%, -50%, 10em);
   transform-style: preserve-3d;
   width: 6rem;
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    width: 4rem;
+  }
 `;
 
 const FloatHeartLottieWrap = styled.div`
@@ -800,8 +844,7 @@ const FloatHeartLottieWrap = styled.div`
   left: 50%;
   transform: translate(-50%, -75%);
   width: 2rem;
-`;
-
-const NumberWrap = styled.div<{ $isAnimating: boolean }>`
-  height: 0;
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    width: 1.8rem;
+  }
 `;

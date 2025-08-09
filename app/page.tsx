@@ -74,22 +74,22 @@ export default function BocchiLandingPage() {
     })();
   }, []);
 
-  useEffect(() => {
-    const isMobile = breakPoint === "mobile";
-    setIsPreventForMobile(isMobile);
+  // useEffect(() => { // 임시
+  //   const isMobile = breakPoint === "mobile";
+  //   setIsPreventForMobile(isMobile);
 
-    if (isMobile) {
-      const scrollbarWidth =
-        window.innerWidth - document.documentElement.clientWidth;
-      document.body.style.overflow = "hidden";
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
-    }
+  //   if (isMobile) {
+  //     const scrollbarWidth =
+  //       window.innerWidth - document.documentElement.clientWidth;
+  //     document.body.style.overflow = "hidden";
+  //     document.body.style.paddingRight = `${scrollbarWidth}px`;
+  //   }
 
-    return () => {
-      document.body.style.overflow = "";
-      document.body.style.paddingRight = "";
-    };
-  }, [breakPoint, isLoading]);
+  //   return () => {
+  //     document.body.style.overflow = "";
+  //     document.body.style.paddingRight = "";
+  //   };
+  // }, [breakPoint, isLoading]);
 
   async function resistUser({ id, pw }: { id: string; pw: string }) {
     try {
@@ -153,8 +153,8 @@ export default function BocchiLandingPage() {
     nextSection?.scrollIntoView();
   }, []);
 
-  const TITLE = "모바일은 작업중이에요⚠️";
-  const DESC = "일단 PC 먼저 확인해주세요.";
+  // const TITLE = "모바일은 작업중이에요⚠️";
+  // const DESC = "일단 PC 먼저 확인해주세요.";
   if (isLoading) return <Loading />;
 
   return (
@@ -163,7 +163,7 @@ export default function BocchiLandingPage() {
       <ThemeProvider theme={theme}>
         {/* <ReactLenis root /> */}
         <PageContainer ref={containerRef}>
-          {isPreventForMobile && (
+          {/* {isPreventForMobile && (
             <Prevent>
               <Popup>
                 <PopupInner>
@@ -172,11 +172,11 @@ export default function BocchiLandingPage() {
                 </PopupInner>
               </Popup>
             </Prevent>
-          )}
+          )} */}
           {/* Hero Section */}
-          <MainSection />
+          {/* <MainSection /> */}
           {/* Character Introduction */}
-          <CharacterIntro />
+          {/* <CharacterIntro /> */}
           {/* Character Popularity Vote Section */}
           <VoteSection
             userId={userId}
@@ -185,10 +185,9 @@ export default function BocchiLandingPage() {
             isHasUserCheck={signupPopupHandle}
             isNowLogin={isNowLogin}
           />
-          <AudioSection frontSection={3} />
+          {/* <AudioSection frontSection={3} /> */}
           {/* YouTube Music Video Carousel */}
           {/* <VideoSection /> */}
-          {/* <Dummy /> */}
           {/* Image List */}
           <ImageSection />
           {/* Guestbook Section */}

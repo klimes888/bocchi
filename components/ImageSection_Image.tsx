@@ -1,13 +1,24 @@
 "use client";
 import styled from "styled-components";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Breakpoint } from "@/hooks/use-breakpoint";
 
-export default function ImageSectionImage({ data }: { data: any[] }) {
+export default function ImageSectionImage({
+  data,
+  breakPoint,
+}: {
+  data: any[];
+  breakPoint: Breakpoint;
+}) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [wheel, setWheel] = useState(0);
   const [height, setHeight] = useState(0);
   const [active, setActive] = useState(false);
+
+  const rafId = useRef<number | null>(null);
+  const startY = useRef<number | null>(null);
+
   const prevScrollY = useRef(0);
 
   // 🌀 이미지 높이 기준으로 wheel 값을 제한
@@ -50,23 +61,56 @@ export default function ImageSectionImage({ data }: { data: any[] }) {
   useEffect(() => {
     if (!active) return;
 
-    let animationFrameId: number;
-
-    const handleWheel = (e: WheelEvent) => {
-      animationFrameId = requestAnimationFrame(() => {
-        setWheel((prev) => {
-          const next = prev + e.deltaY;
-          return next < 0 ? 0 : next;
-        });
+    // PC: wheel
+    if (breakPoint !== "mobile") {
+    }
+    const onWheel = (e: WheelEvent) => {
+      // 필요시 기본 스크롤 막기
+      // e.preventDefault();
+      rafId.current = requestAnimationFrame(() => {
+        setWheel((prev) => Math.max(prev + e.deltaY, 0));
       });
     };
-
-    window.addEventListener("wheel", handleWheel, { passive: false });
+    window.addEventListener("wheel", onWheel, { passive: false });
     return () => {
-      window.removeEventListener("wheel", handleWheel);
-      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener("wheel", onWheel);
+      if (rafId.current) cancelAnimationFrame(rafId.current);
     };
-  }, [active]);
+
+    // Mobile: touch
+    // const onTouchStart = (e: TouchEvent) => {
+    //   // 첫 손가락만 사용
+    //   startY.current = e.touches[0].clientY;
+    // };
+
+    // const onTouchMove = (e: TouchEvent) => {
+    //   if (startY.current == null) return;
+    //   // 페이지 기본 스크롤을 막고 가상 스크롤만 업데이트
+    //   // e.preventDefault();
+    //   const currentY = e.touches[0].clientY;
+    //   const deltaY = startY.current - currentY; // 손가락 위로 올리면 +, 아래로 내리면 -
+    //   rafId.current = requestAnimationFrame(() => {
+    //     setWheel((prev) => Math.max(prev + deltaY, 0));
+    //   });
+    //   // 누적 이동이 되도록 기준점 갱신
+    //   startY.current = currentY;
+    // };
+
+    // const onTouchEnd = () => {
+    //   startY.current = null;
+    // };
+
+    // window.addEventListener("touchstart", onTouchStart, { passive: true });
+    // window.addEventListener("touchmove", onTouchMove, { passive: false }); // preventDefault 위해 false
+    // window.addEventListener("touchend", onTouchEnd, { passive: true });
+
+    // return () => {
+    //   window.removeEventListener("touchstart", onTouchStart);
+    //   window.removeEventListener("touchmove", onTouchMove);
+    //   window.removeEventListener("touchend", onTouchEnd);
+    //   if (rafId.current) cancelAnimationFrame(rafId.current);
+    // };
+  }, [active, breakPoint, setWheel]);
 
   return (
     <ImageItemWrap ref={ref}>

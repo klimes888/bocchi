@@ -70,4 +70,7 @@ const Digit = styled.div`
   text-align: center;
   font-size: 1.5rem;
   font-weight: bold;
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    font-size: 1.15rem;
+  }
 `;

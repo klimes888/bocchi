@@ -35,6 +35,7 @@ import dd from "@/assets/images/30.jpg";
 
 import ImageSectionImage from "./ImageSection_Image";
 import { useRef, useState } from "react";
+import { useBreakpoint } from "@/hooks/use-breakpoint";
 
 export default function ImageSection() {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -57,9 +58,16 @@ export default function ImageSection() {
     [x, b],
   ];
 
-  const columns: any[] = [[], [], [], []];
+  const breakPoint = useBreakpoint();
+  const size = breakPoint === "mobile" ? 2 : 4;
+
+  let columns: any[] = [];
+
+  for (let i = 0; i < size; i++) {
+    columns.push([]);
+  }
   images.forEach((img, i) => {
-    columns[i % 4].push(img);
+    columns[i % size].push(img);
   });
 
   return (
@@ -68,7 +76,7 @@ export default function ImageSection() {
         {columns.map((data, i) => (
           <Column key={i}>
             {data.map((item: any, j: number) => (
-              <ImageSectionImage key={j} data={item} />
+              <ImageSectionImage key={j} data={item} breakPoint={breakPoint} />
             ))}
           </Column>
         ))}
@@ -87,6 +95,10 @@ const Section = styled.div`
   overflow: hidden;
   background-color: #000;
   padding-bottom: 12em;
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
+    padding: 0rem 0.5rem 8em 0.5rem;
+  }
 `;
 
 const ItemSectionInner = styled.div`

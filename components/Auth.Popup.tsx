@@ -415,6 +415,9 @@ const Layout = styled.div<{ top: number }>`
   overflow: hidden;
   z-index: 10;
   transition: display 0.1s ease 5s;
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    padding: 1rem;
+  }
 `;
 
 const Modal = styled.div<{ $open: boolean }>`

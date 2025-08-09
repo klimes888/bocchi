@@ -27,6 +27,7 @@ import { useDragDetect } from "@/hooks/use-drag";
 
 import { submitVote } from "@/lib/firebase/vote";
 import VoteSectionCard from "./VoteSection_Card";
+import { useBreakpoint } from "@/hooks/use-breakpoint";
 
 // Character data with their signature colors
 const characters = [
@@ -125,16 +126,19 @@ export default function VoteSection(props: Props) {
   const [animationActive, setAnimationActive] = useState(false);
   const [isAlreadyVote, setIsAlreadyVote] = useState(true);
 
+  const breakPoint = useBreakpoint();
+
   // const [isAllOpen, setIsAllOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
   const titleWrapref = useRef<HTMLDivElement | null>(null);
   const wordRef = useRef<(HTMLDivElement | null)[]>([]);
 
   const wordAniamtionHandle = (isFirst: boolean) => {
+    const size = breakPoint === "mobile" ? "12rem" : "17rem";
     wordRef.current.forEach((el) => {
       if (!el) return;
       if (isFirst) {
-        el.style.height = "17rem";
+        el.style.height = size;
       } else {
         el.style.height = "0";
       }
@@ -142,10 +146,11 @@ export default function VoteSection(props: Props) {
   };
 
   const wordSmallHandler = (isFirst: boolean) => {
+    const size = breakPoint === "mobile" ? "2.5rem" : "4rem";
     wordRef.current.forEach((el) => {
       if (!el) return;
       if (isFirst) {
-        el.style.fontSize = "4rem";
+        el.style.fontSize = size;
       } else {
       }
     });
@@ -155,13 +160,12 @@ export default function VoteSection(props: Props) {
     if (isFirst) {
       setTimeout(() => {
         wordSmallHandler(true);
+        if (!titleWrapref.current) return;
+        if (isFirst) {
+          const top = breakPoint === "mobile" ? "-200%" : "-130%";
+          titleWrapref.current.style.transform = `translate(-50%, ${top})`;
+        }
       }, 1000);
-    }
-
-    if (!titleWrapref.current) return;
-    if (isFirst) {
-      titleWrapref.current.style.transform = "translate(-50%, -130%)";
-    } else {
     }
   };
 
@@ -306,6 +310,10 @@ const Container = styled.div`
   max-width: 100rem;
   width: 100%;
   height: 100%;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    padding: 0rem 0.5rem 8em 0.5rem;
+  }
 `;
 
 const SectionTitleWrap = styled.div`
@@ -315,7 +323,7 @@ const SectionTitleWrap = styled.div`
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: row;
-  transition: transform 0.5s 1s ease;
+  transition: transform 0.5s ease;
   background: ${(props) => props.theme.colors.gradients.text};
   background-clip: text;
   -webkit-background-clip: text;
@@ -332,7 +340,9 @@ const SectionTitle = styled.div<{
   overflow: hidden;
   transition: height 0.5s ${({ $order }) => `${0.1 * $order}s`} ease;
   font-size: 8rem;
-
+  @media (max-width: ${(props) => props.theme.breakpoints.sm}) {
+    font-size: 4rem;
+  }
   h2 {
     font-weight: bold;
     text-align: center;
@@ -341,6 +351,9 @@ const SectionTitle = styled.div<{
     color: #fff;
     text-shadow: 0 0 4px ${({ color }) => color},
       0 0 8px ${({ color }) => color};
+    @media (max-width: ${(props) => props.theme.breakpoints.sm}) {
+      font-size: 3rem;
+    }
   }
 `;
 
@@ -354,16 +367,14 @@ const SectionLayout = styled(Section)`
 
 const VoteGrid = styled.div`
   display: grid;
-  grid-template-columns: 2fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 2rem;
   width: 100%;
   max-width: 85rem;
   margin-top: 5em;
-  @media (min-width: ${(props) => props.theme.breakpoints.md}) {
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media (min-width: ${(props) => props.theme.breakpoints.lg}) {
-    grid-template-columns: repeat(4, 1fr);
+    gap: 0.65rem;
+    margin-top: 11em;
   }
 `;
