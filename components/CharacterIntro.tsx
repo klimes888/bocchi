@@ -16,6 +16,7 @@ import Back from "../assets/background.jpg";
 import CharacterIntroPopup from "./CharacterIntro_Popup";
 import { animations } from "@/lib/styled-animations";
 import { useDragDetect } from "@/hooks/use-drag";
+import { useBreakpoint } from "@/hooks/use-breakpoint";
 
 // Character data with their signature colors
 
@@ -79,11 +80,11 @@ export default function CharacterIntro() {
   }>({ open: false, type: "" });
 
   useDragDetect({ threshold: 20, curPos: "section2", where: "section3" });
-
   const [glitch, setGlitch] = useState<string | null>(null);
   const [radiColor, setRadiColor] = useState<string | null>(null);
   const cardRef = useRef<(HTMLDivElement | null)[]>([]);
   const wordRef = useRef<(HTMLDivElement | null)[]>([]);
+  const breakPoint = useBreakpoint();
 
   useIntersectionObserver(ref, 0.9, {
     isEnter: () => {
@@ -140,17 +141,6 @@ export default function CharacterIntro() {
             ))}
           </SectionTitleWrap>
           <CharacterGrid>
-            {glitch && (
-              <>
-                <WiggleUi
-                  style={{
-                    background: glitch,
-                  }}
-                />
-                <WiggleUi2 style={{ background: glitch }} />
-              </>
-            )}
-
             {characters.map((character, i) => (
               <CardLayout
                 key={i}
@@ -159,6 +149,17 @@ export default function CharacterIntro() {
                 }}
                 $animation={character.animation}
                 $order={i}
+                onTouchStart={() => {
+                  setGlitch(character.color);
+                  setRadiColor(character.radiColor);
+                }}
+                onTouchEnd={() => {
+                  setTimeout(() => {
+                    setGlitch(null);
+                    setRadiColor(null);
+                    setOpenPopup({ open: true, type: character.name });
+                  }, 1000);
+                }}
                 onMouseEnter={() => {
                   setGlitch(character.color);
                   setRadiColor(character.radiColor);
@@ -167,14 +168,17 @@ export default function CharacterIntro() {
                   setGlitch(null);
                   setRadiColor(null);
                 }}
-                onClick={() =>
-                  setOpenPopup({ open: true, type: character.name })
-                }
+                onClick={() => {
+                  if (breakPoint !== "mobile") {
+                    setOpenPopup({ open: true, type: character.name });
+                  }
+                }}
               >
                 <CharacterCard
                   $bgColor={character.bgColor}
                   $color={character.color}
                   $bdColor={character.bdColor}
+                  $isMb={breakPoint === "mobile"}
                 >
                   <ContentInner $color={character.color}>
                     <CharacterLayoutOut>
@@ -216,16 +220,19 @@ export default function CharacterIntro() {
   );
 }
 
-const WiggleUi = styled.div`
+const WiggleUi = styled.div<{ $isMb: boolean }>`
   display: flex;
   position: absolute;
-  top: 50%;
-  left: 45%;
+  top: ${({ $isMb }) => ($isMb ? "-20%" : "50%")};
+  left: ${({ $isMb }) => ($isMb ? "50%" : "45%")};
   bottom: 0;
   right: 0;
-  width: 20%;
-  height: 2em;
-  animation: ${animations.wiggle_up} 0.2s infinite;
+  width: ${({ $isMb }) => ($isMb ? "3%" : "20%")};
+  height: ${({ $isMb }) => ($isMb ? "40rem" : "2rem")};
+  animation: ${({ $isMb }) =>
+      $isMb ? animations.mb_wiggle_up : animations.wiggle_up}
+    0.2s infinite;
+  z-index: 1;
 `;
 
 const WiggleUi2 = styled(WiggleUi)`
@@ -264,6 +271,8 @@ const SectionTitleWrap = styled.div<{ $url: string }>`
   display: flex;
   flex-direction: row;
   font-weight: bold;
+  align-items: center;
+  justify-content: center;
   color: transparent;
   background-image: url(${({ $url }) => $url});
   background-size: 100%; /* Enlarged for smooth animation */
@@ -271,6 +280,7 @@ const SectionTitleWrap = styled.div<{ $url: string }>`
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: animate-background 2s infinite alternate linear;
+  flex-wrap: nowrap;
 
   @keyframes animate-background {
     0% {
@@ -283,7 +293,8 @@ const SectionTitleWrap = styled.div<{ $url: string }>`
 `;
 
 const SectionTitle = styled.div<{ $order: number }>`
-  font-size: 5.5rem;
+  /* font-size: 5.5rem; */
+  font-size: clamp(3.5rem, 2vw, 5.5rem);
   font-weight: bold;
   transition: background 0.4s ${({ $order }) => `${900 + $order * 40}ms`} ease;
   background-color: rgba(0, 0, 0, 1);
@@ -357,6 +368,10 @@ const CharacterAvatar = styled.div`
   object-fit: contain;
   z-index: 1;
   @media (max-width: 420px) {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: 100%;
     height: auto;
   }
@@ -396,6 +411,7 @@ const CharacterCard = styled(Card)<{
   $bgColor: string;
   $color: string;
   $bdColor: string;
+  $isMb: boolean;
 }>`
   position: relative;
   width: 100%;
@@ -437,7 +453,9 @@ const CharacterCard = styled(Card)<{
     }
 
     ${CharacterAvatar} {
-      animation: ${animations.glitch_step} 0.5s steps(4, end) infinite;
+      animation: ${({ $isMb }) =>
+          $isMb ? animations.mb_glitch_step : animations.glitch_step}
+        0.5s steps(4, end) infinite;
     }
   }
 

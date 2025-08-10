@@ -3,6 +3,7 @@ import styled, { keyframes, css } from "styled-components";
 
 import Image, { StaticImageData } from "next/image";
 import { chara } from "@/data/intro";
+import { useBreakpoint } from "@/hooks/use-breakpoint";
 
 interface Props {
   type: string;
@@ -33,6 +34,8 @@ const CharacterIntroPopup = (props: Props) => {
   const [headerHeight, setHeaderHeight] = useState(0);
   const ref = useRef(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const breakPoint = useBreakpoint();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -68,7 +71,7 @@ const CharacterIntroPopup = (props: Props) => {
     const headerElement = (ref.current as HTMLElement).offsetHeight;
     setHeaderHeight(headerElement);
   }, [ref.current, isOpen]);
-
+  const size = breakPoint === "mobile" ? 80 : 122;
   return (
     <Layout
       $open={isOpen}
@@ -77,10 +80,10 @@ const CharacterIntroPopup = (props: Props) => {
         isClick(!isOpen);
       }}
     >
-      <Popup $open={isOpen} style={{ top: scrollY + 122 }} />
+      <Popup $open={isOpen} style={{ top: scrollY + size }} />
       <ScrollWrapper
         ref={scrollRef}
-        style={{ top: scrollY + 122, height: window.innerHeight - 122 }}
+        style={{ top: scrollY + size, height: window.innerHeight - size }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* <UgoiraWrap
@@ -178,17 +181,6 @@ const Popup = styled.div<{ $open: boolean }>`
     cubic-bezier(0.19, 1, 0.22, 1);
 `;
 
-const UgoiraWrap = styled.div`
-  display: flex;
-  width: 100%;
-  height: 10em;
-`;
-
-const Ugoira = styled.img`
-  width: 10em;
-  height: 100%;
-`;
-
 const PopupInner = styled.div<{ $open: boolean }>`
   background-color: #fff;
   width: 100%;
@@ -214,8 +206,8 @@ const TitleWrap = styled.div<{ $index: number }>`
 
 const Title = styled.h2`
   font-family: "Roboto Condensed", sans-serif;
-  letter-spacing: -0.4rem;
-  font-size: clamp(3rem, 4vw, 5.5rem);
+  letter-spacing: -0.2rem;
+  font-size: clamp(2.5rem, 4vw, 5.5rem);
   font-weight: bold;
   color: rgba(0, 0, 0, 1);
 `;
@@ -231,11 +223,21 @@ const ContentWrap = styled.div`
   background-repeat: repeat-x;
   min-height: 1px;
   width: 100%;
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    padding: 0.5em;
+    margin-bottom: 2rem;
+    flex-direction: column;
+  }
 `;
 
 const BodyImgWrap = styled.div`
-  min-width: 40%;
+  max-width: 40%;
   padding: 0 1em;
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    margin-top: 3rem;
+    padding: 0;
+    max-width: 30%;
+  }
 `;
 const BodyImg = styled(Image)`
   width: 100%;
@@ -250,6 +252,9 @@ const DescWrapOutter = styled.div`
   background-size: 1px 1.2rem;
   background-repeat: repeat-y;
   background-position: left;
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    width: auto;
+  }
 `;
 
 const DummyLayout = styled.div`
@@ -274,12 +279,20 @@ const DescWrap = styled.div<{ $isLast: boolean }>`
       background-size: 0.8rem 1px;
       background-repeat: repeat-x;
     `}
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    width: auto;
+    margin: 0;
+  }
 `;
 
 const DescWrapInner = styled.div`
   display: flex;
   flex-direction: column;
   padding: 0 2em;
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    padding: 0;
+  }
 `;
 
 const Header = styled.p`
@@ -297,7 +310,7 @@ const Descript = styled.div<{ $isQuote: boolean }>`
     $isQuote &&
     css`
       font-style: italic;
-      font-size: clamp(1rem, 1vw, 1.3rem);
+      font-size: clamp(0.85rem, 1vw, 1.3rem);
       padding-top: 0.5em;
     `}
 `;
@@ -313,7 +326,7 @@ const AccordianWrap = styled.button`
 `;
 
 const CardTitle = styled(Header)`
-  font-size: clamp(1.1rem, 1vw, 1.5rem);
+  font-size: clamp(0.9rem, 1vw, 1.5rem);
   margin-bottom: 0;
   margin-top: 0.25em;
   font-weight: 400;
@@ -333,10 +346,15 @@ const CardWrap = styled.div<{ $isClick: boolean }>`
   display: flex;
   align-items: flex-start;
   width: 80%;
-  height: ${({ $isClick }) => ($isClick ? "6.5em" : 0)};
-  transition: height 0.5s ease-in-out;
+  height: ${({ $isClick }) => ($isClick ? "auto" : 0)};
+  max-height: ${({ $isClick }) => ($isClick ? "10rem" : 0)};
+  transition: max-height 0.5s ease-in-out;
   overflow-y: hidden;
   margin-top: 0.5em;
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    width: 100%;
+    padding: ${({ $isClick }) => ($isClick ? "0.5rem 0" : 0)};
+  }
 `;
 
 const CardDesc = styled.p`

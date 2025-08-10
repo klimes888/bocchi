@@ -61,9 +61,6 @@ export default function ImageSectionImage({
   useEffect(() => {
     if (!active) return;
 
-    // PC: wheel
-    if (breakPoint !== "mobile") {
-    }
     const onWheel = (e: WheelEvent) => {
       // 필요시 기본 스크롤 막기
       // e.preventDefault();

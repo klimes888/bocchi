@@ -84,6 +84,22 @@ export const animations = {
     transform: translateY(-100%) skewX(100deg);
   } 
     `,
+  mb_wiggle_up: keyframes`
+  from {
+    transform: translateX(105%) skewY(15deg);
+  }
+  to {
+    transform: translateX(-15%) skewX(-20deg);
+  }
+    `,
+  mb_wiggle_middle: keyframes`
+  from {
+    transform: translateX(10%) skewY(15deg);
+  }
+  to {
+    transform: translateX(10%) skewY(100deg);
+  } 
+    `,
 
   glitch_flicker: keyframes`
     0% {
@@ -121,6 +137,22 @@ export const animations = {
   }
   100% {
     transform: translate(0, 0);
+  }`,
+  mb_glitch_step: keyframes`
+   0% {
+    transform: translate(-50%, 0);
+  }
+  20% {
+    transform: translate(-49%, -2px);
+  }
+  40%, 60%, 70% {
+    transform: translate(-50%, 0);
+  }
+  80% {
+    transform: translate(-51%, -6px);
+  }
+  100% {
+    transform: translate(-50%, 0);
   }
 `,
 };

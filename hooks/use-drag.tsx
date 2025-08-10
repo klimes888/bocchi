@@ -16,7 +16,7 @@ export function useDragDetect({
   const wheelTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollLockTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const breakPoint = useBreakpoint();
+  // const breakPoint = useBreakpoint();
 
   const lockScroll = () => {
     document.body.style.overflow = "hidden";
@@ -28,7 +28,7 @@ export function useDragDetect({
 
   useLayoutEffect(() => {
     const section = document.getElementById(curPos);
-    if (!section || breakPoint === "mobile") return;
+    if (!section) return;
 
     const goToNextSection = () => {
       lockScroll();
@@ -38,7 +38,7 @@ export function useDragDetect({
       if (scrollLockTimeout.current) clearTimeout(scrollLockTimeout.current);
       scrollLockTimeout.current = setTimeout(() => {
         unlockScroll();
-      }, 1000); // 1초 후 스크롤 다시 허용
+      }, 500); // 1초 후 스크롤 다시 허용
     };
 
     // 터치 이벤트
@@ -94,7 +94,7 @@ export function useDragDetect({
       section.removeEventListener("mousedown", handleMouseDown);
       section.removeEventListener("mouseup", handleMouseUp);
       section.removeEventListener("wheel", handleWheel);
-      unlockScroll();
+      // unlockScroll();
       if (wheelTimeout.current) clearTimeout(wheelTimeout.current);
     };
   }, [curPos, where, threshold]);

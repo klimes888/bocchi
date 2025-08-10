@@ -71,7 +71,7 @@ export default function ImageSection() {
   });
 
   return (
-    <Section ref={ref}>
+    <Section ref={ref} id="section5">
       <ItemSectionInner>
         {columns.map((data, i) => (
           <Column key={i}>
@@ -97,7 +97,7 @@ const Section = styled.div`
   padding-bottom: 12em;
 
   @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
-    padding: 0rem 0.5rem 8em 0.5rem;
+    padding: 8rem 0.5rem 8rem 0.5rem;
   }
 `;
 
