@@ -76,7 +76,7 @@ export default function ImageSection() {
         {columns.map((data, i) => (
           <Column key={i}>
             {data.map((item: any, j: number) => (
-              <ImageSectionImage key={j} data={item} breakPoint={breakPoint} />
+              <ImageSectionImage key={j} data={item} />
             ))}
           </Column>
         ))}

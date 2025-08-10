@@ -1,113 +1,83 @@
 "use client";
 import styled from "styled-components";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
-import { useEffect, useRef, useState } from "react";
-import { Breakpoint } from "@/hooks/use-breakpoint";
-
-export default function ImageSectionImage({
-  data,
-  breakPoint,
-}: {
-  data: any[];
-  breakPoint: Breakpoint;
-}) {
+export default function ImageSectionImage({ data }: { data: any[] }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [wheel, setWheel] = useState(0);
   const [height, setHeight] = useState(0);
   const [active, setActive] = useState(false);
 
-  const rafId = useRef<number | null>(null);
-  const startY = useRef<number | null>(null);
-
   const prevScrollY = useRef(0);
+  const rafId = useRef<number | null>(null);
 
-  // 🌀 이미지 높이 기준으로 wheel 값을 제한
-  const clampedWheel = Math.max(0, Math.min(Math.ceil(wheel), height));
-
-  // 📦 스크롤 위치 감지 (위/아래)
+  // 가시성 판정 + Δ스크롤만큼 wheel 누적
   const handleScroll = () => {
     const currentY = window.scrollY;
-    const isDown = currentY > prevScrollY.current;
+    const delta = currentY - prevScrollY.current;
     prevScrollY.current = currentY;
 
     const el = ref.current;
     if (!el) return;
 
     const rect = el.getBoundingClientRect();
-    const windowHeight = window.innerHeight;
-    const triggerPoint = windowHeight / 2;
+    const winH = window.innerHeight;
+    const trigger = winH / 2;
+    const inView = rect.top <= trigger + 50 && rect.bottom >= trigger - 50;
 
-    const inView =
-      rect.top <= triggerPoint + 50 && rect.bottom >= triggerPoint - 50;
+    if (!inView) {
+      // 화면을 벗어나면 활성 끄고 종료
+      if (active) setActive(false);
+      return;
+    }
 
-    if (inView && !active) {
+    if (!active) {
       setActive(true);
-      setHeight(rect.height); // 필요한 시점에만 height 계산
-    } else if (!inView && active) {
-      if (!isDown && wheel <= 0) {
-        setActive(false);
-      }
+      // inView 진입 시 height 없으면 채워두기
+      if (!height) setHeight(rect.height);
+    }
+
+    // inView 상태에서만 스크롤 델타 반영
+    if (delta !== 0) {
+      if (rafId.current) cancelAnimationFrame(rafId.current);
+      rafId.current = requestAnimationFrame(() => {
+        setWheel((prev) => {
+          const next = prev + delta;
+          return Math.max(0, Math.min(next, height || rect.height));
+        });
+      });
     }
   };
 
-  // 🎯 스크롤 이벤트
+  // window scroll 리스너(한 번만 등록)
   useEffect(() => {
+    // 초기 스냅샷
+    prevScrollY.current = window.scrollY;
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); // 초기 진입 체크
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [active, wheel]);
-
-  // 🎡 휠 이벤트
-  useEffect(() => {
-    if (!active) return;
-
-    const onWheel = (e: WheelEvent) => {
-      // 필요시 기본 스크롤 막기
-      // e.preventDefault();
-      rafId.current = requestAnimationFrame(() => {
-        setWheel((prev) => Math.max(prev + e.deltaY, 0));
-      });
-    };
-    window.addEventListener("wheel", onWheel, { passive: false });
+    // 최초 한 번 체크
+    handleScroll();
     return () => {
-      window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("scroll", handleScroll);
       if (rafId.current) cancelAnimationFrame(rafId.current);
     };
+  }, []);
 
-    // Mobile: touch
-    // const onTouchStart = (e: TouchEvent) => {
-    //   // 첫 손가락만 사용
-    //   startY.current = e.touches[0].clientY;
-    // };
+  // 요소 높이 변화 대응 (글자 줄바꿈/리사이즈 등)
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => {
+      const h = entries[0].contentRect.height;
+      setHeight(h);
+      // wheel 클램프
+      setWheel((prev) => Math.max(0, Math.min(prev, h)));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
-    // const onTouchMove = (e: TouchEvent) => {
-    //   if (startY.current == null) return;
-    //   // 페이지 기본 스크롤을 막고 가상 스크롤만 업데이트
-    //   // e.preventDefault();
-    //   const currentY = e.touches[0].clientY;
-    //   const deltaY = startY.current - currentY; // 손가락 위로 올리면 +, 아래로 내리면 -
-    //   rafId.current = requestAnimationFrame(() => {
-    //     setWheel((prev) => Math.max(prev + deltaY, 0));
-    //   });
-    //   // 누적 이동이 되도록 기준점 갱신
-    //   startY.current = currentY;
-    // };
-
-    // const onTouchEnd = () => {
-    //   startY.current = null;
-    // };
-
-    // window.addEventListener("touchstart", onTouchStart, { passive: true });
-    // window.addEventListener("touchmove", onTouchMove, { passive: false }); // preventDefault 위해 false
-    // window.addEventListener("touchend", onTouchEnd, { passive: true });
-
-    // return () => {
-    //   window.removeEventListener("touchstart", onTouchStart);
-    //   window.removeEventListener("touchmove", onTouchMove);
-    //   window.removeEventListener("touchend", onTouchEnd);
-    //   if (rafId.current) cancelAnimationFrame(rafId.current);
-    // };
-  }, [active, breakPoint, setWheel]);
+  // 렌더용 클램프
+  const clampedWheel = Math.max(0, Math.min(Math.ceil(wheel), height));
 
   return (
     <ImageItemWrap ref={ref}>
@@ -129,7 +99,7 @@ export default function ImageSectionImage({
 const ImageItemWrap = styled.div`
   position: relative;
   width: 100%;
-  overflow: hidden;
+  /* window 스크롤을 사용하므로 여기 overflow는 기본값으로 두는 게 자연스러움 */
 `;
 
 const ImageItem = styled.img<{ $height?: number }>`
@@ -140,8 +110,7 @@ const ImageItem = styled.img<{ $height?: number }>`
 
 const ImageItemInner = styled.div<{ $height: number }>`
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0 0 auto 0;
   width: 100%;
   height: ${({ $height }) => $height}px;
   overflow: hidden;

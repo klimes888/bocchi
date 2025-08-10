@@ -15,6 +15,7 @@ import rocknroll from "@/assets/music/rocknroll.webp";
 
 import TOUCH_LOTT from "@/assets/icons/touch.json";
 import { useIntersectionObserver } from "./useIntersection";
+import { useBreakpoint } from "@/hooks/use-breakpoint";
 
 const audioDatas = [
   {
@@ -88,6 +89,7 @@ export default function AudioSection({ frontSection, heightSize }: Props) {
   const [itemSize, setItemSize] = useState(0);
   const [maxHeight, setMaxHeight] = useState(1000);
   const [firstClick, setFirstClick] = useState(false);
+  const breakPoint = useBreakpoint();
 
   useEffect(() => {
     isAllowedRef.current = isAllowedToPlay;
@@ -152,13 +154,20 @@ export default function AudioSection({ frontSection, heightSize }: Props) {
     if (!sectionRef.current) return;
     const { height } = sectionRef.current.getBoundingClientRect();
 
-    const curSecStart = window.innerHeight / 2;
+    const curSecStart =
+      breakPoint === "mobile"
+        ? window.innerWidth / 2.1
+        : window.innerHeight / 2;
+    const curSecEnd =
+      breakPoint === "mobile"
+        ? window.innerHeight * 1.3
+        : window.innerHeight * 1.5;
 
     if (scrollX + curSecStart <= heightSize) {
       // 스크롤 위로 올렸을 때,
       setIsAllowedToPlay(false);
       setActiveIndex(null);
-    } else if (heightSize + height - window.innerHeight * 1.5 <= scrollX) {
+    } else if (heightSize + height - curSecEnd <= scrollX) {
       setIsAllowedToPlay(false);
       setActiveIndex(null);
     } else {
@@ -168,9 +177,11 @@ export default function AudioSection({ frontSection, heightSize }: Props) {
 
   useEffect(() => {
     if (!innerRef.current) return;
-    const maxScroll = innerRef.current.scrollWidth + window.innerWidth / 1.2;
+    const result =
+      breakPoint === "mobile" ? window.innerHeight : window.innerWidth / 1.2;
+    const maxScroll = innerRef.current.scrollWidth + result;
     setMaxHeight(maxScroll);
-  }, []);
+  }, [breakPoint]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -182,12 +193,8 @@ export default function AudioSection({ frontSection, heightSize }: Props) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // const sectionStart = (frontSection - frontSection / 4) * window.innerWidth;
   const sectionStart = heightSize;
-  // console.log("sectionStart", sectionStart);
-  // console.log("sectionStart2", sectionStart2);
   const relativeScroll = scrollX - sectionStart; // 현재 섹션 기준 위치
-  // console.log("relativeScroll", relativeScroll);
   const progress =
     Math.min(Math.max((relativeScroll * 2) / maxHeight, 0), 1) * 2; // 0 ~ 1 정규화
   const colorValue = Math.floor(progress * 255);
@@ -196,8 +203,13 @@ export default function AudioSection({ frontSection, heightSize }: Props) {
     if (!innerRef.current) return;
     // 이전 섹션들 width 만큼 오른쪽으로 이동
     const prevSectionW = frontSection * window.innerWidth;
+    const prevSectionW2 = heightSize;
+    const isMb = breakPoint === "mobile";
+    const prevW = isMb ? prevSectionW2 : prevSectionW;
+    const divideResult = isMb ? 0 : window.innerWidth;
+
     innerRef.current.style.transform = `translateX(${
-      prevSectionW - window.innerWidth - scrollX
+      prevW - divideResult - scrollX
     }px)`;
 
     const containerCenter = window.innerWidth / 2;
@@ -218,7 +230,7 @@ export default function AudioSection({ frontSection, heightSize }: Props) {
     });
 
     setActiveIndex(closestIndex);
-  }, [scrollX, isAllowedToPlay]);
+  }, [scrollX, isAllowedToPlay, breakPoint]);
 
   useEffect(() => {
     if (!audioRefs.current.length) return;
@@ -325,6 +337,9 @@ const HorizontalInner = styled.div`
   display: flex;
   column-gap: 12rem;
   animation: transform 0.8s ease;
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    column-gap: 7rem;
+  }
 `;
 
 const ItemLayout = styled.div<{
@@ -374,6 +389,10 @@ const ItemTitle = styled.p`
   font-weight: 500;
   color: #222;
   margin-bottom: 2rem;
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    margin-bottom: 1rem;
+    font-size: 2rem;
+  }
 `;
 
 const ItemDesc = styled.p`
@@ -381,12 +400,18 @@ const ItemDesc = styled.p`
   font-weight: 300;
   color: #333;
   margin-bottom: 1rem;
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    font-size: 0.9rem;
+  }
 `;
 
 const ItemDate = styled.p`
   font-size: 0.9rem;
   font-weight: 400;
   color: #222;
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    font-size: 0.8rem;
+  }
 `;
 
 const ItemContent = styled.div<{ $active: boolean }>`
@@ -399,6 +424,10 @@ const ItemContent = styled.div<{ $active: boolean }>`
     css`
       animation: ${rotate} 5s linear infinite;
     `}
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    width: 8.5rem;
+    height: 8.5rem;
+  }
 `;
 const ItemContentInner = styled.div<{ $active: boolean }>`
   position: relative;
@@ -416,9 +445,11 @@ const ItemContentInner = styled.div<{ $active: boolean }>`
 `;
 
 const ImageWrap = styled(Image)`
-  width: 100%;
   width: 10rem;
   object-fit: contain;
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    width: 8.5rem;
+  }
 `;
 
 const AlbumWrap = styled.div`
