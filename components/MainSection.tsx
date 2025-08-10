@@ -11,18 +11,30 @@ import LogoText from "@/assets/Logo_Text.png";
 import Kessoku from "@/assets/kessoku.png";
 import { useDragDetect } from "@/hooks/use-drag";
 import ParticleBackground from "./ui/canvas-animation";
+import { useLayoutEffect, useRef } from "react";
 
-export default function MainSection() {
+export default function MainSection({
+  size,
+}: {
+  size: (flag: number) => void;
+}) {
   // hooks
   useDragDetect({ threshold: 10, curPos: "section1", where: "section2" });
+  const sectionRef = useRef<HTMLDivElement | null>(null);
 
   const goToNextSection = () => {
     const nextSection = document.getElementById("section2");
     nextSection?.scrollIntoView({ behavior: "smooth" });
   };
 
+  useLayoutEffect(() => {
+    if (!sectionRef.current) return;
+    const { height } = sectionRef.current.getBoundingClientRect();
+    size(height);
+  }, [sectionRef]);
+
   return (
-    <HeroSection id="section1">
+    <HeroSection id="section1" ref={sectionRef}>
       <HeroImage src={Back} alt="Kessoku Band" fill sizes="100vw" />
       <TitleLoggWrap>
         <TitleLogo src={LogoText} alt="" />

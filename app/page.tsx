@@ -1,7 +1,6 @@
 "use client";
 import type React from "react";
 import styled, { ThemeProvider } from "styled-components";
-import { ReactLenis } from "lenis/react";
 
 import { theme } from "@/lib/styled-theme";
 
@@ -9,8 +8,8 @@ import CharacterIntro from "@/components/CharacterIntro";
 import Guestbook from "@/components/Guestbook";
 import MainSection from "@/components/MainSection";
 import Footer from "@/components/Footer";
-import { useEffect, useRef, useState } from "react";
-import { UUID } from "@/lib/create-uuid";
+import { useCallback, useEffect, useRef, useState } from "react";
+
 import {
   createUsers,
   fetchUserDocument,
@@ -41,7 +40,7 @@ export default function BocchiLandingPage() {
   const [voteCount, setvoteCount] = useState<Record<string, number> | null>(
     null
   );
-  const [isPreventForMobile, setIsPreventForMobile] = useState(false);
+
   const [createUser, setCreateUser] = useState(false);
 
   const [dialog, setDialog] = useState(false);
@@ -51,13 +50,18 @@ export default function BocchiLandingPage() {
 
   const [loginType, setLoginType] = useState(LoginEnum.FIRST);
 
-  const breakPoint = useBreakpoint();
-
   const [emojiPopup, setEmojiPopup] = useState(false);
   const [selectEmoji, setSelectEmoji] = useState<{
     key: number;
     img: StaticImageData;
   } | null>(null);
+
+  const [heightSize, setHeightSize] = useState<Record<string, number>>({});
+  const totalHeight = Object.values(heightSize).reduce((a, b) => a + b, 0);
+
+  const reportSize = useCallback((id: string, h: number) => {
+    setHeightSize((prev) => ({ ...prev, [id]: h })); // 같은 id는 덮어쓰기
+  }, []);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -174,18 +178,19 @@ export default function BocchiLandingPage() {
             </Prevent>
           )} */}
           {/* Hero Section */}
-          {/* <MainSection /> */}
+          <MainSection size={(size) => reportSize("a", size)} />
           {/* Character Introduction */}
-          {/* <CharacterIntro /> */}
+          <CharacterIntro size={(size) => reportSize("b", size)} />
           {/* Character Popularity Vote Section */}
           <VoteSection
+            size={(size) => reportSize("c", size)}
             userId={userId}
             whoVoted={whoVoted}
             voteCount={voteCount}
             isHasUserCheck={signupPopupHandle}
             isNowLogin={isNowLogin}
           />
-          {/* <AudioSection frontSection={3} /> */}
+          <AudioSection frontSection={3} heightSize={totalHeight} />
           {/* YouTube Music Video Carousel */}
           {/* <VideoSection /> */}
           {/* Image List */}

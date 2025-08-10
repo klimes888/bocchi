@@ -67,9 +67,10 @@ const LottieFile = () => (
 
 type Props = {
   frontSection: number;
+  heightSize: number;
 };
 
-export default function AudioSection({ frontSection }: Props) {
+export default function AudioSection({ frontSection, heightSize }: Props) {
   const containerCenter = window.innerWidth / 2; // center fix
 
   // ref
@@ -148,19 +149,22 @@ export default function AudioSection({ frontSection }: Props) {
   // 상수
   useEffect(() => {
     if (!firstClick) return;
+    if (!sectionRef.current) return;
+    const { height } = sectionRef.current.getBoundingClientRect();
 
-    const curSecStart = -(frontSection * window.innerHeight) + scrollX;
-    if (-curSecStart >= window.innerHeight / 2.4) {
+    const curSecStart = window.innerHeight / 2;
+
+    if (scrollX + curSecStart <= heightSize) {
       // 스크롤 위로 올렸을 때,
       setIsAllowedToPlay(false);
       setActiveIndex(null);
-    } else if (curSecStart > maxHeight - window.innerWidth) {
+    } else if (heightSize + height - window.innerHeight * 1.5 <= scrollX) {
       setIsAllowedToPlay(false);
       setActiveIndex(null);
     } else {
       setIsAllowedToPlay(true);
     }
-  }, [scrollX, maxHeight, firstClick]);
+  }, [scrollX, maxHeight, firstClick, sectionRef]);
 
   useEffect(() => {
     if (!innerRef.current) return;
@@ -178,9 +182,12 @@ export default function AudioSection({ frontSection }: Props) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const sectionStart = (frontSection - frontSection / 4) * window.innerWidth;
+  // const sectionStart = (frontSection - frontSection / 4) * window.innerWidth;
+  const sectionStart = heightSize;
+  // console.log("sectionStart", sectionStart);
+  // console.log("sectionStart2", sectionStart2);
   const relativeScroll = scrollX - sectionStart; // 현재 섹션 기준 위치
-
+  // console.log("relativeScroll", relativeScroll);
   const progress =
     Math.min(Math.max((relativeScroll * 2) / maxHeight, 0), 1) * 2; // 0 ~ 1 정규화
   const colorValue = Math.floor(progress * 255);
@@ -301,7 +308,7 @@ const Section = styled.section<{ $height: number }>`
   width: 100%;
   height: ${({ $height }) => $height}px;
   display: flex;
-  background: linear-gradient(180deg, #fdf2f8, #fdf2f8, #fdf2f8, #222, #222);
+  background: linear-gradient(180deg, #fdf2f8, #dad1d6, #555, #333, #222, #000);
   padding-top: 5em;
   padding-bottom: 30em;
 `;

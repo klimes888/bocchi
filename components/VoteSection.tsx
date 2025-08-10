@@ -1,7 +1,14 @@
 "use client";
 
 import type React from "react";
-import { createRef, Fragment, useEffect, useRef, useState } from "react";
+import {
+  createRef,
+  Fragment,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import styled, { css } from "styled-components";
 
 // assets
@@ -107,6 +114,7 @@ interface Props {
   voteCount: Record<string, number> | null;
   isHasUserCheck: (top: number) => void;
   isNowLogin: boolean;
+  size: (flag: number) => void;
 }
 
 const theme: Record<string, string> = {
@@ -132,6 +140,13 @@ export default function VoteSection(props: Props) {
   const ref = useRef<HTMLDivElement | null>(null);
   const titleWrapref = useRef<HTMLDivElement | null>(null);
   const wordRef = useRef<(HTMLDivElement | null)[]>([]);
+
+  useLayoutEffect(() => {
+    if (!ref.current) return;
+    const { height } = ref.current.getBoundingClientRect();
+    console.log("height", height);
+    props?.size(height);
+  }, [ref]);
 
   const wordAniamtionHandle = (isFirst: boolean) => {
     const size = breakPoint === "mobile" ? "12rem" : "17rem";

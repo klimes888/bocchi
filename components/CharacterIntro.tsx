@@ -10,7 +10,7 @@ import Nijika from "@/assets/characters/Nijika_Ijichi.webp";
 import Kita from "@/assets/characters/Ikuyo_Kita.webp";
 import Ryo from "@/assets/characters/Ryo_Yamada.webp";
 import { useIntersectionObserver } from "./useIntersection";
-import { Fragment, useRef, useState } from "react";
+import { Fragment, useLayoutEffect, useRef, useState } from "react";
 
 import Back from "../assets/background.jpg";
 import CharacterIntroPopup from "./CharacterIntro_Popup";
@@ -72,12 +72,23 @@ const characters = [
   },
 ];
 
-export default function CharacterIntro() {
-  const ref = useRef(null);
+export default function CharacterIntro({
+  size,
+}: {
+  size: (flag: number) => void;
+}) {
+  const ref = useRef<HTMLDivElement | null>(null);
+
   const [openPopup, setOpenPopup] = useState<{
     open: boolean;
     type: string;
   }>({ open: false, type: "" });
+
+  useLayoutEffect(() => {
+    if (!ref.current) return;
+    const { height } = ref.current.getBoundingClientRect();
+    size(height);
+  }, [ref]);
 
   useDragDetect({ threshold: 20, curPos: "section2", where: "section3" });
   const [glitch, setGlitch] = useState<string | null>(null);
