@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Users } from "lucide-react";
 
 import styled, { css } from "styled-components";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { StaticImageData } from "next/image";
 import { CommentType } from "./Guestbook";
 
@@ -26,7 +26,7 @@ type Props = {
       img: StaticImageData;
     } | null>
   >;
-  isHasUserCheck: () => void;
+  isHasUserCheck: (size: number) => void;
   userId: string | null;
 };
 
@@ -88,9 +88,34 @@ export default function GuestbookMakeInfo(props: Props) {
     return selectEmoji ? "" : msg;
   };
 
+  const inputRef = useRef<any>(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    if (!window.visualViewport) return;
+
+    let initialHeight = window.visualViewport.height;
+
+    const handleResize = () => {
+      const currentHeight = window.visualViewport!.height;
+      if (currentHeight < initialHeight) {
+        setKeyboardHeight(initialHeight - currentHeight); // 키보드 높이 저장
+      } else {
+        setKeyboardHeight(0); // 키보드 닫힘
+      }
+    };
+
+    window.visualViewport.addEventListener("resize", handleResize);
+
+    return () => {
+      window.visualViewport?.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   const validateChangeEv = (type: string, value: string) => {
     if (!userId) {
-      isHasUserCheck();
+      isHasUserCheck(keyboardHeight);
+      inputRef.current?.blur();
       return;
     }
     setNewComment({ ...newComment, [type]: value });
@@ -108,6 +133,7 @@ export default function GuestbookMakeInfo(props: Props) {
         <FormInner>
           <InputWrap>
             <ExtendInput
+              ref={inputRef}
               placeholder={placeHolderHandler(1, "별명")}
               $isAlert={alert.target === 1 && !!alert.msg}
               value={newComment.username}

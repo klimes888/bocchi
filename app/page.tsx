@@ -26,6 +26,7 @@ import { AuthDialog } from "@/components/Auth.Popup";
 import { EmojiDialog } from "@/components/Emoji.Popup";
 import { StaticImageData } from "next/image";
 import { useBreakpoint } from "@/hooks/use-breakpoint";
+import MainSectionMobile from "@/components/MainSection.Mobile";
 
 export enum LoginEnum {
   NONE, // not logined
@@ -41,9 +42,11 @@ export default function BocchiLandingPage() {
     null
   );
 
+  const breakPoint = useBreakpoint();
+
   const [createUser, setCreateUser] = useState(false);
 
-  const [dialog, setDialog] = useState(false);
+  const [dialog, setDialog] = useState({ open: false, top: 0 });
   const [isNowLogin, setIsNowLogin] = useState(false); // 로그인 되어있는 상태인지 or 회원가입 후 로그인 했는지 여부
 
   const [authAlert, setAuthAlert] = useState(USER_ERROR_CODE.NONE);
@@ -65,9 +68,10 @@ export default function BocchiLandingPage() {
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const signupPopupHandle = () => {
-    if (userId) return; // if has user info then logined
-    setDialog(!dialog);
+  const signupPopupHandle = (top: number = 0) => {
+    // if (userId) return; // if has user info then logined
+
+    setDialog({ open: !!!userId, top });
   };
 
   useEffect(() => {
@@ -118,7 +122,7 @@ export default function BocchiLandingPage() {
       if (result.code === SUCCESS) {
         localStorage.setItem("user_uuid", result.data?.id);
         setUserId(result.data?.id);
-        setDialog(false);
+        setDialog((prev) => ({ ...prev, open: false }));
         fetchUserData(result.data?.id);
         setIsNowLogin(true);
       } else {
@@ -178,7 +182,11 @@ export default function BocchiLandingPage() {
             </Prevent>
           )} */}
           {/* Hero Section */}
-          <MainSection size={(size) => reportSize("a", size)} />
+          {breakPoint === "mobile" ? (
+            <MainSectionMobile size={(size) => reportSize("a", size)} />
+          ) : (
+            <MainSection size={(size) => reportSize("a", size)} />
+          )}
           {/* Character Introduction */}
           <CharacterIntro size={(size) => reportSize("b", size)} />
           {/* Character Popularity Vote Section */}

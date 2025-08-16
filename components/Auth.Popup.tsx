@@ -6,6 +6,7 @@ import Starry from "@/assets/starry.jpg";
 import Ticket from "@/assets/icons/ticket.json";
 import Lottie from "lottie-react";
 import { USER_ERROR_CODE } from "@/lib/firebase/users";
+import { useBreakpoint } from "@/hooks/use-breakpoint";
 
 type ResistUser = (flag: {
   id: string;
@@ -13,10 +14,10 @@ type ResistUser = (flag: {
 }) => Promise<{ code: USER_ERROR_CODE; data: any | null } | undefined>;
 
 interface Props {
-  openChange: Dispatch<SetStateAction<boolean>>;
+  openChange: Dispatch<SetStateAction<{ open: boolean; top: number }>>;
   resistUser: ResistUser;
   loginUser: ResistUser;
-  open: boolean;
+  open: { open: boolean; top: number };
   createUser: boolean;
 }
 
@@ -161,11 +162,14 @@ const AuthContent = ({
     );
   };
 
+  const breakPoint = useBreakpoint();
+
   return (
     <ImageBlurWrap
       $changeAuth={changeAuth}
       $realOpen={realOpen}
       $animate={animate}
+      $isMb={breakPoint === "mobile"}
     >
       <ImageBlur />
       <ModalInner $changeAuth={isAnimated}>
@@ -248,10 +252,10 @@ export const AuthDialog = ({
   const [changeAuth, setChangeAuth] = useState(false); // 회원가입 여부
   const [animate, setAnimate] = useState(false);
   const [realOpen, setRealOpen] = useState(false);
-
+  const breakPoint = useBreakpoint();
   // 팝업 자연스럽게 띄우는 애니메이션
   useEffect(() => {
-    if (!open) return;
+    if (!open.open) return;
     const scrollbarWidth =
       window.innerWidth - document.documentElement.clientWidth;
     document.body.style.overflow = "hidden";
@@ -261,7 +265,7 @@ export const AuthDialog = ({
       document.body.style.overflow = "";
       document.body.style.paddingRight = "";
     };
-  }, [top, open]);
+  }, [top, open.open]);
 
   // 원본 이미지 화면 애니메이션
   const bannerRender = () => {
@@ -270,6 +274,7 @@ export const AuthDialog = ({
         $changeAuth={changeAuth}
         $realOpen={realOpen}
         $animate={animate}
+        $isMb={breakPoint === "mobile"}
       >
         <ModalBanner src={Starry.src} />
       </ModalBannerWrap>
@@ -278,7 +283,7 @@ export const AuthDialog = ({
 
   // 팝업 컨트롤 할 때, open boolean
   useEffect(() => {
-    if (open) {
+    if (open.open) {
       setRealOpen(true);
     } else {
       setTimeout(() => {
@@ -286,18 +291,18 @@ export const AuthDialog = ({
         setRealOpen(false);
       }, 800);
     }
-  }, [open]);
+  }, [open.open]);
 
   if (!realOpen) return <></>;
 
   return (
     <Layout
       onClick={(e) => {
-        openChange(false);
+        openChange((prev) => ({ ...prev, open: false }));
       }}
-      top={window.scrollY}
+      top={window.scrollY - (open?.top / 3 || 0)}
     >
-      <Modal onClick={(e) => e.stopPropagation()} $open={open}>
+      <Modal onClick={(e) => e.stopPropagation()} $open={open.open}>
         {bannerRender()}
         <AuthContent
           changeAuth={changeAuth}
@@ -353,6 +358,18 @@ const clipAnimation = keyframes`
   }
 `;
 
+const mbClipAnimation = keyframes`
+  0% {
+    clip-path: inset(0 1px 60% 0);
+  }
+  70% {
+    clip-path: inset(0 1px 0 0);
+  }
+  100% {
+    clip-path: inset(80% 1px 0 0);
+  }
+`;
+
 const clipAnimationReverse = keyframes`
   0% {
     clip-path: inset(70% 1px 0 0);
@@ -362,6 +379,36 @@ const clipAnimationReverse = keyframes`
   }
   100% {
     clip-path: inset(0 1px 60% 0);
+  }
+`;
+
+const mbClipAnimationReverse = keyframes`
+  0% {
+    clip-path: inset(70% 1px 0 0);
+  }
+  70% {
+    clip-path: inset(0 1px 0 0);
+  }
+  100% {
+    clip-path: inset(0 1px 70% 0);
+  }
+`;
+
+const mbBackAnimation = keyframes`
+  0% {
+    clip-path: inset(20% 0 0 0);
+  }
+  30% {
+    clip-path: inset(0 0 0 0);
+  }
+  50% {
+    clip-path: inset(0 0 0 0);
+  }
+  70% {
+    clip-path: inset(0 0 20% 0);
+  }
+  100% {
+    clip-path: inset(0 0 20% 0);
   }
 `;
 
@@ -384,6 +431,24 @@ const backAnimation = keyframes`
 `;
 
 const backAnimationReverse = keyframes`
+  0% {
+    clip-path: inset(0 0 30% 0);
+  }
+  30% {
+    clip-path: inset(0 0 30% 0);
+  }
+  50% {
+    clip-path: inset(0 0 0 0);
+  }
+  70% {
+    clip-path: inset(0 0 0 0);
+  }
+  100% {
+    clip-path: inset(30% 0 0 0);
+  }
+`;
+
+const mbBackAnimationReverse = keyframes`
   0% {
     clip-path: inset(0 0 30% 0);
   }
@@ -434,12 +499,17 @@ const Modal = styled.div<{ $open: boolean }>`
   background: linear-gradient(120deg, #ebabc8, #336ba8);
   box-shadow: 0.5em 0.5em 2em 1em rgba(23, 61, 101, 0.8);
   padding: 4px;
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    width: 100%;
+    height: 30rem;
+  }
 `;
 
 const ModalBannerWrap = styled.div<{
   $changeAuth: boolean;
   $realOpen: boolean;
   $animate: boolean;
+  $isMb: boolean;
 }>`
   position: absolute;
   top: 0.2em;
@@ -452,13 +522,23 @@ const ModalBannerWrap = styled.div<{
   border-radius: 1.2rem;
   clip-path: inset(0 1px 60% 0);
   z-index: 15;
-  ${({ $changeAuth, $realOpen, $animate }) =>
+  ${({ $realOpen, $animate, $isMb, $changeAuth }) =>
     $realOpen &&
     $animate &&
     css`
-      animation: ${$changeAuth ? clipAnimation : clipAnimationReverse} 1s
-        ease-in-out forwards;
+      animation: ${$isMb
+          ? $changeAuth
+            ? mbClipAnimation
+            : mbClipAnimationReverse
+          : $changeAuth
+          ? clipAnimation
+          : clipAnimationReverse}
+        1s ease-in-out forwards;
     `}
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    clip-path: inset(0 1px 70% 0);
+  }
 `;
 
 const ModalBanner = styled.img`
@@ -471,6 +551,7 @@ const ImageBlurWrap = styled.div<{
   $changeAuth: boolean;
   $realOpen: boolean;
   $animate: boolean;
+  $isMb: boolean;
 }>`
   position: absolute;
   top: 0.2em;
@@ -481,12 +562,18 @@ const ImageBlurWrap = styled.div<{
   overflow: hidden;
   display: flex;
   z-index: 13;
-  ${({ $changeAuth, $realOpen, $animate }) =>
+  ${({ $realOpen, $animate, $isMb, $changeAuth }) =>
     $realOpen &&
     $animate &&
     css`
-      animation: ${$changeAuth ? backAnimation : backAnimationReverse} 1.5s ease
-        forwards;
+      animation: ${$isMb
+          ? $changeAuth
+            ? mbBackAnimation
+            : mbBackAnimationReverse
+          : $changeAuth
+          ? backAnimation
+          : backAnimationReverse}
+        1.5s ease forwards;
     `}
 `;
 

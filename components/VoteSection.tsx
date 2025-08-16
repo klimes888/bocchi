@@ -208,8 +208,7 @@ export default function VoteSection(props: Props) {
     // return;
     if (!ref.current) return;
     if (!userId) {
-      const top = ref.current?.offsetTop;
-      isHasUserCheck(top);
+      isHasUserCheck(0);
       return;
     }
     if (votedCharacter !== null) return;

@@ -17,7 +17,6 @@ import { UUID } from "@/lib/create-uuid";
 
 import CONG_LOTT from "@/assets/icons/confetti.json";
 import Lottie from "lottie-react";
-import lottieCtrl from "lottie-web";
 
 interface Props {
   loginType: LoginEnum;
@@ -273,9 +272,9 @@ export default function Guestbook(props: Props) {
             newComment={newComment}
             sendData={handleCommentSubmit}
             setSelectEmoji={setSelectEmoji}
-            isHasUserCheck={() =>
-              isHasUserCheck(topRef?.current?.offsetTop || 0)
-            }
+            isHasUserCheck={(keyBoard) => {
+              isHasUserCheck(Number(keyBoard) || 0);
+            }}
             userId={userId}
           />
           {congratuationLottieRender()}
