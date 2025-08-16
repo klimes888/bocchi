@@ -15,7 +15,7 @@ import { Fragment, useLayoutEffect, useRef, useState } from "react";
 import Back from "../assets/background.jpg";
 import CharacterIntroPopup from "./CharacterIntro_Popup";
 import { animations } from "@/lib/styled-animations";
-import { useDragDetect } from "@/hooks/use-drag";
+// import { useDragDetect } from "@/hooks/use-drag";
 import { useBreakpoint } from "@/hooks/use-breakpoint";
 
 // Character data with their signature colors
@@ -90,14 +90,14 @@ export default function CharacterIntro({
     size(height);
   }, [ref]);
 
-  useDragDetect({ threshold: 20, curPos: "section2", where: "section3" });
+  // useDragDetect({ threshold: 0.2, curPos: "section2", where: "section3" });
   const [glitch, setGlitch] = useState<string | null>(null);
   const [radiColor, setRadiColor] = useState<string | null>(null);
   const cardRef = useRef<(HTMLDivElement | null)[]>([]);
   const wordRef = useRef<(HTMLDivElement | null)[]>([]);
   const breakPoint = useBreakpoint();
 
-  useIntersectionObserver(ref, 0.9, {
+  useIntersectionObserver(ref, 0.8, {
     isEnter: () => {
       requestAnimationFrame(() => {
         cardRef.current.forEach((el) => {

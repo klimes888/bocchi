@@ -68,9 +68,11 @@ export default function VoteSectionCard(props: Props) {
   const buttonRef = useRef<HTMLDivElement | null>(null);
   const floatHeartRefs = useRef<any>(null);
   const heartRefs = useRef<any>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const [rectCalc, setRectCalc] = useState<DOMRect | null>(null);
+  const touchMoveHandlerRef = useRef<((e: TouchEvent) => void) | null>(null);
+  const isTouchDragging = useRef(false);
+  const lastRect = useRef<DOMRect | null>(null);
+
   const [rollingAnime, setRollingAnime] = useState(false);
   const [preventMouse, setPreventMouse] = useState(true);
 
@@ -78,7 +80,6 @@ export default function VoteSectionCard(props: Props) {
 
   const cardWrapHandler = () => {
     const card = charaRef.current;
-    let timer;
     if (
       !card ||
       !titleWrapRef.current ||
@@ -87,7 +88,7 @@ export default function VoteSectionCard(props: Props) {
     )
       return;
     if (loadPage) {
-      const size = breakPoint === "mobile" ? "20rem" : "27rem";
+      const size = breakPoint === "mobile" ? "16rem" : "27rem";
       card.style.height = size;
       card.style.boxShadow = "0 1em 1em 0.25em rgba(0, 0, 0, 0.3)";
 
@@ -165,7 +166,7 @@ export default function VoteSectionCard(props: Props) {
       // Trigger when click card for card rotate
       card.style.transition = "transform 1000ms cubic-bezier(0.1, 0.9, 0.2, 1)";
       card.style.transform = `rotateX(0deg) rotateY(1980deg)`;
-      const size = breakPoint === "mobile" ? "19rem" : "24.5rem";
+      const size = breakPoint === "mobile" ? "18.5rem" : "24.5rem";
       card.style.height = size;
 
       // card transition이 끝난 후 실행하는 리스너
@@ -221,35 +222,23 @@ export default function VoteSectionCard(props: Props) {
     return () => timers.forEach(clearTimeout);
   }, [votedCharacter, isAlreadyVote]);
 
-  let _touchMoveHandler: ((e: TouchEvent) => void) | null = null;
-
   function enableScrollLock() {
-    // iOS 등에서 window/body 스크롤 차단
-    if (_touchMoveHandler) return; // 중복 등록 방지
-    _touchMoveHandler = (e: TouchEvent) => {
-      console.log(">>>>>>>>>>>>>>");
-      e.preventDefault();
-    };
-    window.addEventListener("touchmove", _touchMoveHandler, { passive: false });
-
-    // 선택: 바디 스크롤 잠금 (필요 시)
-    // document.body.style.overflow = 'hidden';
-    // document.body.style.position = 'fixed';
-    // document.body.style.width = '100%';
+    if (touchMoveHandlerRef.current) return;
+    const handler = (e: TouchEvent) => e.preventDefault();
+    touchMoveHandlerRef.current = handler;
+    window.addEventListener("touchmove", handler, { passive: false });
+    // 필요시 바디도 잠금
+    // document.body.style.overflow = "hidden";
   }
 
   function disableScrollLock() {
-    if (_touchMoveHandler) {
-      window.removeEventListener("touchmove", _touchMoveHandler);
-      _touchMoveHandler = null;
+    const handler = touchMoveHandlerRef.current;
+    if (handler) {
+      window.removeEventListener("touchmove", handler);
+      touchMoveHandlerRef.current = null;
     }
-    // document.body.style.overflow = '';
-    // document.body.style.position = '';
-    // document.body.style.width = '';
+    // document.body.style.overflow = "";
   }
-
-  const isTouchDragging = useRef(false);
-  const lastRect = useRef<DOMRect | null>(null);
 
   const onPointerEnter = (e: React.PointerEvent) => {
     if (preventMouse || character.open) return;
@@ -475,13 +464,13 @@ const VoteCardWrap = styled.div<{
 }>`
   position: relative;
   width: 100%;
-  height: 27em;
+  height: 2em;
   transform-style: preserve-3d;
   perspective: 50em;
   z-index: ${({ order }) => 5 - order};
   user-select: none;
   @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
-    height: 20em;
+    height: 18rem;
     perspective: 40em;
   }
 `;
@@ -576,13 +565,13 @@ const CharacterWrap = styled(CharacterDummy)<{ type?: string }>`
   ${({ type }) => {
     switch (type) {
       case "HITORI":
-        return `width: 65%; transform: translate(-50%, 1%); height: 18rem;`;
+        return `width: 65%; transform: translate(-50%, 0); height: 17.5rem;`;
       case "RYO":
-        return `width: 80%; transform: translate(-50%, 1%); height: 18rem;`;
+        return `width: 80%; transform: translate(-50%, 0); height: 17.5rem;`;
       case "NIJIKA":
-        return `width: 77%; transform: translate(-50%, 0%); height: 18rem;`;
+        return `width: 77%; transform: translate(-50%, 0); height: 17.5;`;
       case "IKUYO":
-        return `width: 90.5%; transform: translate(-50%, 2%); height: 18rem;`;
+        return `width: 90.5%; transform: translate(-50%, 0); height: 17.5;`;
 
       default:
         return "width: 70%;";
@@ -595,13 +584,13 @@ const CharacterWrap = styled(CharacterDummy)<{ type?: string }>`
     ${({ type }) => {
       switch (type) {
         case "HITORI":
-          return `width: 65%; transform: translate(-50%, 0%); height: 14rem;`;
+          return `width: 65%; transform: translate(-50%, 2%); height: 14rem;`;
         case "RYO":
-          return `width: 80%; transform: translate(-50%, 1%);`;
+          return `width: 80%; transform: translate(-50%, 2%); height: 14rem;`;
         case "NIJIKA":
-          return `width: 77%; transform: translate(-50%, -1%); height: 13.5rem;`;
+          return `width: 77%; transform: translate(-50%, 0); height: 14rem;`;
         case "IKUYO":
-          return `width: 90%; transform: translate(-50%, 1%); height: 13.5rem;`;
+          return `width: 90%; transform: translate(-50%, 2%); height: 14rem;`;
 
         default:
           return "width: 70%;";

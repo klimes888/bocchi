@@ -37,7 +37,7 @@ export const theme: any = {
     black: "#000000",
   },
   breakpoints: {
-    sm: "390px",
+    sm: "430px",
     md: "640px",
     lg: "1024px",
     xl: "1280px",

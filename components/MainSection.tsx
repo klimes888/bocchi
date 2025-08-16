@@ -19,7 +19,7 @@ export default function MainSection({
   size: (flag: number) => void;
 }) {
   // hooks
-  useDragDetect({ threshold: 10, curPos: "section1", where: "section2" });
+  useDragDetect({ threshold: 20, curPos: "section1", where: "section2" });
   const sectionRef = useRef<HTMLDivElement | null>(null);
 
   const goToNextSection = () => {

@@ -16,6 +16,7 @@ import rocknroll from "@/assets/music/rocknroll.webp";
 import TOUCH_LOTT from "@/assets/icons/touch.json";
 import { useIntersectionObserver } from "./useIntersection";
 import { useBreakpoint } from "@/hooks/use-breakpoint";
+// import { useDragDetect } from "@/hooks/use-drag";
 
 const audioDatas = [
   {
@@ -73,7 +74,11 @@ type Props = {
 
 export default function AudioSection({ frontSection, heightSize }: Props) {
   const containerCenter = window.innerWidth / 2; // center fix
-
+  // useDragDetect({
+  //   threshold: 0.2,
+  //   curPos: "section4",
+  //   where: "section5",
+  // });
   // ref
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const innerRef = useRef<HTMLDivElement | null>(null);

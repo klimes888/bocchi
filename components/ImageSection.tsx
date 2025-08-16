@@ -36,10 +36,15 @@ import dd from "@/assets/images/30.jpg";
 import ImageSectionImage from "./ImageSection_Image";
 import { useRef, useState } from "react";
 import { useBreakpoint } from "@/hooks/use-breakpoint";
+// import { useDragDetect } from "@/hooks/use-drag";
 
 export default function ImageSection() {
   const ref = useRef<HTMLDivElement | null>(null);
-
+  // useDragDetect({
+  //   threshold: 0.2,
+  //   curPos: "section5",
+  //   where: "section6",
+  // });
   const images = [
     [f, j],
     [bb, o],

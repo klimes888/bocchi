@@ -30,7 +30,7 @@ import VotedKita from "@/assets/votes/voted_kita2.png";
 
 import { useIntersectionObserver } from "./useIntersection";
 
-import { useDragDetect } from "@/hooks/use-drag";
+// import { useDragDetect } from "@/hooks/use-drag";
 
 import { submitVote } from "@/lib/firebase/vote";
 import VoteSectionCard from "./VoteSection_Card";
@@ -125,7 +125,7 @@ const theme: Record<string, string> = {
 };
 
 export default function VoteSection(props: Props) {
-  useDragDetect({ threshold: 20, curPos: "section3", where: "section4" });
+  // useDragDetect({ threshold: 0.4, curPos: "section3", where: "section4" });
   const { userId, whoVoted, voteCount, isHasUserCheck, isNowLogin } = props;
   const [itemList, setItemList] = useState(characters);
   const [votedCharacter, setVotedCharacter] = useState<number | null>(null);
@@ -144,7 +144,6 @@ export default function VoteSection(props: Props) {
   useLayoutEffect(() => {
     if (!ref.current) return;
     const { height } = ref.current.getBoundingClientRect();
-    console.log("height", height);
     props?.size(height);
   }, [ref]);
 
@@ -184,7 +183,7 @@ export default function VoteSection(props: Props) {
     }
   };
 
-  useIntersectionObserver(ref, 0.9, {
+  useIntersectionObserver(ref, 0.7, {
     isEnter: () => {
       setLoadPage(true);
       requestAnimationFrame(() => {
@@ -194,7 +193,7 @@ export default function VoteSection(props: Props) {
     },
   });
 
-  useIntersectionObserver(ref, 0.05, {
+  useIntersectionObserver(ref, 0.1, {
     elseFunc: () => {
       setLoadPage(false);
       requestAnimationFrame(() => {
@@ -315,6 +314,9 @@ const Section = styled.section<{ $background?: string }>`
   display: flex;
   justify-content: center;
   align-items: center;
+  @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
+    height: 110vh;
+  }
 `;
 
 const Container = styled.div`

@@ -6,8 +6,8 @@ import Back from "@/assets/background.jpg";
 import LogoText from "@/assets/Logo_Text.png";
 import Kessoku from "@/assets/kessoku.png";
 import MainMb from "@/assets/mb_main.jpg";
-import { useDragDetect } from "@/hooks/use-drag";
-import { useLayoutEffect, useRef } from "react";
+// import { useDragDetect } from "@/hooks/use-drag";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useParallaxSticky } from "@/hooks/use-parallax";
 
 const speed = 0.5,
@@ -19,31 +19,24 @@ export default function MainSectionMobile({
 }: {
   size: (flag: number) => void;
 }) {
+  const [heigh, setHeigh] = useState(0);
   // hooks
-  useDragDetect({ threshold: 10, curPos: "section1", where: "section2" });
+  // useDragDetect({
+  //   threshold: 0.2,
+  //   curPos: "section1",
+  //   where: "section2",
+  // });
   const sectionRef = useRef<HTMLDivElement>(null);
   const ref = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
-  const logoRef = useRef<HTMLDivElement>(null);
 
   useParallaxSticky(sectionRef, ref, { speed, zoom: true, fromScale, toScale });
-  // useParallax(logoRef, {
-  //   speed,
-  //   zoom: false,
-  //   fromScale,
-  //   toScale,
-  // });
-  // useParallaxSticky(sectionRef, ref, {
-  //   speed,
-  //   zoom: false,
-  //   fromScale,
-  //   toScale,
-  // });
 
   useLayoutEffect(() => {
     if (!sectionRef.current) return;
     const { height } = sectionRef.current.getBoundingClientRect();
     size(height);
+    setHeigh(height);
   }, []);
 
   const Title = "BOCCHI THE\nROCK!";

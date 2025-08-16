@@ -27,6 +27,7 @@ import { EmojiDialog } from "@/components/Emoji.Popup";
 import { StaticImageData } from "next/image";
 import { useBreakpoint } from "@/hooks/use-breakpoint";
 import MainSectionMobile from "@/components/MainSection.Mobile";
+import { useSectionAutoSnap } from "@/hooks/use-drag";
 
 export enum LoginEnum {
   NONE, // not logined
@@ -161,6 +162,34 @@ export default function BocchiLandingPage() {
     nextSection?.scrollIntoView();
   }, []);
 
+  useEffect(() => {
+    const block = (e: Event) => e.preventDefault();
+
+    // 데스크탑 우클릭 메뉴
+    document.addEventListener("contextmenu", block);
+
+    // 이미지/링크 드래그 시작 차단
+    document.addEventListener("dragstart", block);
+
+    // 모바일 길게 누르기 메뉴 차단 (일부 브라우저)
+    document.addEventListener("gesturestart", block as any);
+    document.addEventListener("selectstart", block);
+
+    return () => {
+      document.removeEventListener("contextmenu", block);
+      document.removeEventListener("dragstart", block);
+      document.removeEventListener("gesturestart", block as any);
+      document.removeEventListener("selectstart", block);
+    };
+  }, []);
+
+  // useSectionAutoSnap({
+  //   sectionIds: ["section1", "section2", "section3", "section4"],
+  //   triggerOffsetPx: 120,
+  //   cooldownMs: 900,
+  //   // rearmOnAnyScroll: true, // 필요하면 활성화
+  // });
+
   // const TITLE = "모바일은 작업중이에요⚠️";
   // const DESC = "일단 PC 먼저 확인해주세요.";
   if (isLoading) return <Loading />;
@@ -239,6 +268,7 @@ const PageContainer = styled.div`
   width: 100%;
   background: ${(props) => props.theme.colors.gradients.background};
   transform-style: preserve-3d;
+  user-select: none;
 `;
 
 const Prevent = styled.div`
