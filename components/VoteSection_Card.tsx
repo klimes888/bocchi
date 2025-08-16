@@ -221,54 +221,80 @@ export default function VoteSectionCard(props: Props) {
     return () => timers.forEach(clearTimeout);
   }, [votedCharacter, isAlreadyVote]);
 
-  // tilt cacl
-  const tiltCalcHandler = (e: React.MouseEvent) => {
+  let _touchMoveHandler: ((e: TouchEvent) => void) | null = null;
+
+  function enableScrollLock() {
+    // iOS 등에서 window/body 스크롤 차단
+    if (_touchMoveHandler) return; // 중복 등록 방지
+    _touchMoveHandler = (e: TouchEvent) => {
+      console.log(">>>>>>>>>>>>>>");
+      e.preventDefault();
+    };
+    window.addEventListener("touchmove", _touchMoveHandler, { passive: false });
+
+    // 선택: 바디 스크롤 잠금 (필요 시)
+    // document.body.style.overflow = 'hidden';
+    // document.body.style.position = 'fixed';
+    // document.body.style.width = '100%';
+  }
+
+  function disableScrollLock() {
+    if (_touchMoveHandler) {
+      window.removeEventListener("touchmove", _touchMoveHandler);
+      _touchMoveHandler = null;
+    }
+    // document.body.style.overflow = '';
+    // document.body.style.position = '';
+    // document.body.style.width = '';
+  }
+
+  const isTouchDragging = useRef(false);
+  const lastRect = useRef<DOMRect | null>(null);
+
+  const onPointerEnter = (e: React.PointerEvent) => {
+    if (preventMouse || character.open) return;
+    const card = charaRef.current;
+    if (!card) return;
+    lastRect.current = card.getBoundingClientRect();
+    card.style.transition = "transform 0.25s ease";
+    setTimeout(() => {
+      card.style.transition = "none";
+    }, 150);
+  };
+
+  const onPointerMove = (e: React.PointerEvent) => {
     if (character.open) return;
+
+    // 마우스는 hover만으로
+    if (e.pointerType === "mouse") {
+      if (preventMouse) return;
+    }
+
+    // 터치는 드래그 중일 때만
+    if (e.pointerType === "touch") {
+      if (!isTouchDragging.current) return;
+    }
+
     const card = charaRef.current;
     const glare = glareRef.current;
-    if (!card || !glare || !rectCalc) return;
-    const x = e.clientX - rectCalc.left; // 카드 내부에서의 마우스 X
-    const y = e.clientY - rectCalc.top; // 카드 내부에서의 마우스 Y
+    const rect = lastRect.current ?? card?.getBoundingClientRect();
+    if (!card || !glare || !rect) return;
+    lastRect.current = rect;
 
-    const centerX = rectCalc.width / 2;
-    const centerY = rectCalc.height / 2;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
 
-    const rotateX = ((y - centerY) / centerY) * 25; // 위아래 반전
-    const rotateY = ((x - centerX) / centerX) * -25;
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
+    const rx = Number((((y - cy) / cy) * 25).toFixed(2));
+    const ry = Number((((x - cx) / cx) * -25).toFixed(2));
+    const angle = Math.atan2(y - cy, x - cx) * (180 / Math.PI);
 
-    const toFixedRotateX = rotateX.toFixed(2);
-    const toFixedRotateY = rotateY.toFixed(2);
-
-    card.style.transform = `rotateX(${toFixedRotateX}deg) rotateY(${toFixedRotateY}deg)`;
-    const angle = Math.atan2(y - centerY, x - centerX) * (180 / Math.PI);
+    card.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
     glare.style.background = `linear-gradient(${angle}deg, ${character.linear.a}, ${character.linear.b}`;
   };
 
-  const handleMouseEnter = (e: React.MouseEvent) => {
-    if (preventMouse) return;
-    const card = charaRef.current;
-    if (card) {
-      const rect = card.getBoundingClientRect();
-      setRectCalc(rect);
-    }
-    // Just run once
-    const glare = glareRef.current;
-    if (!card || !glare) return;
-    card.style.transition = "transform 0.25s ease";
-    timeoutRef.current = setTimeout(() => {
-      if (!card) return;
-      card.style.transition = "none";
-    }, 150); // transition 시간과 일치
-
-    tiltCalcHandler(e);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (preventMouse) return;
-    tiltCalcHandler(e);
-  };
-
-  const handleMouseLeave = () => {
+  const onPointerLeave = () => {
     if (character.open || preventMouse) return;
     const card = charaRef.current;
     const glare = glareRef.current;
@@ -276,7 +302,47 @@ export default function VoteSectionCard(props: Props) {
     card.style.transition = "transform 0.25s ease";
     card.style.transform = "rotateX(0deg) rotateY(0deg)";
     glare.style.background = `linear-gradient(120deg, ${character.linear.a}, ${character.linear.b}`;
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    lastRect.current = null;
+  };
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (character.open) return;
+
+    if (e.pointerType === "touch") {
+      isTouchDragging.current = true;
+
+      // 스크롤 잠금: 1) 요소 터치 스크롤 차단
+      const el = e.currentTarget as HTMLElement;
+      el.style.touchAction = "none";
+      el.setPointerCapture?.(e.pointerId);
+
+      // 2) 전역 스크롤도 차단
+      enableScrollLock();
+
+      // rect 캐시
+      const card = charaRef.current;
+      if (card) lastRect.current = card.getBoundingClientRect();
+    }
+  };
+
+  const endTouchDrag = (e?: React.PointerEvent) => {
+    if (!isTouchDragging.current) return;
+    isTouchDragging.current = false;
+    if (e) {
+      const el = e.currentTarget as HTMLElement;
+      el.style.touchAction = "auto";
+    }
+    disableScrollLock();
+  };
+
+  const onPointerUp = (e: React.PointerEvent) => {
+    endTouchDrag(e);
+    onPointerLeave(); // 손 떼면 원복
+  };
+
+  const onPointerCancel = (e: React.PointerEvent) => {
+    endTouchDrag(e);
+    onPointerLeave();
   };
 
   const heartLottieWrap = () => {
@@ -308,9 +374,13 @@ export default function VoteSectionCard(props: Props) {
   return (
     <VoteCardWrap
       ref={bodyRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      onMouseEnter={handleMouseEnter}
+      onPointerEnter={onPointerEnter}
+      onPointerMove={onPointerMove}
+      onPointerLeave={onPointerLeave}
+      onPointerDown={onPointerDown}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerCancel}
+      // style={{ touchAction: isDraggingRef.current ? "none" : "auto" }}
       order={order}
       onClick={() => {
         if (votedCharacter) return;
