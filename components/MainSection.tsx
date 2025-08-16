@@ -9,7 +9,7 @@ import { animations } from "@/lib/styled-animations";
 import Back from "@/assets/background.jpg";
 import LogoText from "@/assets/Logo_Text.png";
 import Kessoku from "@/assets/kessoku.png";
-import { useDragDetect } from "@/hooks/use-drag";
+// import { useDragDetect } from "@/hooks/use-drag";
 import ParticleBackground from "./ui/canvas-animation";
 import { useLayoutEffect, useRef } from "react";
 
@@ -19,7 +19,7 @@ export default function MainSection({
   size: (flag: number) => void;
 }) {
   // hooks
-  useDragDetect({ threshold: 20, curPos: "section1", where: "section2" });
+  // useDragDetect({ threshold: 20, curPos: "section1", where: "section2" });
   const sectionRef = useRef<HTMLDivElement | null>(null);
 
   const goToNextSection = () => {
