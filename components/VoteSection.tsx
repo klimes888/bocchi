@@ -1,14 +1,7 @@
 "use client";
 
 import type React from "react";
-import {
-  createRef,
-  Fragment,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
 import styled, { css } from "styled-components";
 
 // assets
