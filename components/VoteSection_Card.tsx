@@ -272,7 +272,6 @@ export default function VoteSectionCard(props: Props) {
 
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-
     const cx = rect.width / 2;
     const cy = rect.height / 2;
     const rx = Number((((y - cy) / cy) * 25).toFixed(2));
@@ -464,7 +463,7 @@ const VoteCardWrap = styled.div<{
 }>`
   position: relative;
   width: 100%;
-  height: 2em;
+  /* height: 2em; */
   transform-style: preserve-3d;
   perspective: 50em;
   z-index: ${({ order }) => 5 - order};
